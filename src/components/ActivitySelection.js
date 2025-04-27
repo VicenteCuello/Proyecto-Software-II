@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'; //para guardar estados->actividades seleccionadas
+import { useParams, useNavigate } from 'react-router-dom'; //useParams: Capturar parametros de la URL  |useNavigate: Navegar a otra ruta dentro de la app
+import Button from '@mui/material/Button'; //button de MUI
 
 function ActivitySelection() {
   const { date } = useParams(); // Capturar la fecha de la URL
-  const navigate = useNavigate();
-  const [activities, setActivities] = useState([]);
+  const navigate = useNavigate(); //moverse a otra pagina, quizas al calendario de vuelta
+  const [activities, setActivities] = useState([]); //estado que guarda un array de las actividades seleccionadas
 
-  const availableActivities = ['Yoga', 'Correr', 'Leer', 'Estudiar React'];
+  const availableActivities = ['Yoga', 'Correr', 'Leer', 'Estudiar React']; //array con opciones a elegir 
 
-  const toggleActivity = (activity) => {
+  const toggleActivity = (activity) => { //funcion toggleActivity
     setActivities((prev) =>
       prev.includes(activity)
         ? prev.filter((a) => a !== activity)
@@ -38,9 +39,17 @@ function ActivitySelection() {
           </li>
         ))}
       </ul>
-      <button onClick={handleSave} style={{ marginTop: '20px', padding: '10px 20px' }}>
+      {/*<button onClick={handleSave} style={{ marginTop: '20px', padding: '10px 20px' }}>
         Guardar y volver
-      </button>
+      </button>*/}
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={handleSave} 
+        style={{ marginTop: '20px' }}
+      >
+        Guardar y volver
+      </Button>
     </div>
   );
 }
