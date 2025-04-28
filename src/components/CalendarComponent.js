@@ -24,4 +24,3 @@ function CalendarComponent() {
 }
 
 export default CalendarComponent;
-
