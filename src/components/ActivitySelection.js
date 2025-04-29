@@ -7,7 +7,7 @@ function ActivitySelection() {
   const { date } = useParams();
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]); //activities es el array del usuario
-  const [openSnackbar, setOpenSnackbar] = useState(false); //para cuando selecciona "guardar"
+  //const [openSnackbar, setOpenSnackbar] = useState(false); //para cuando selecciona "guardar"
   const [openDialog, setOpenDialog] = useState(false); // para cuando selecciona volver
 
   const availableActivities = [ //array de actividades disponibles con su nombre y elemento grafico
@@ -31,11 +31,12 @@ function ActivitySelection() {
 //funcion para volver al calendario al presionar guardar: 
   const handleSave = () => {
     console.log(`Actividades registradas para ${date}:`, activities);
-    setOpenSnackbar(true); //mensaje de confirmacion al guardar actividades
-    setTimeout(() => {
+    navigate('/'); // Volver al calendario
+    //setOpenSnackbar(true); //mensaje de confirmacion al guardar actividades
+    /*setTimeout(() => {
       setOpenSnackbar(false);
       navigate('/'); //volver al calendario
-    }, 1000); //mensaje se muestra por un segundo (tiempo de espera)
+    }, 1000); *///mensaje se muestra por un segundo (tiempo de espera)
   };
 
   //volver al calendario si se confirma "cancelar"
@@ -100,13 +101,13 @@ function ActivitySelection() {
           Cancelar
         </Button>
       </div>
-
-      {/* mensaje al confirmar actividades seleccionadas ("guardar") */}
+      
+      {/* mensaje al confirmar actividades seleccionadas ("guardar") 
       <Snackbar
         open={openSnackbar}
         message="Actividades guardadas con éxito"
         autoHideDuration={2000} // Se cierra automáticamente después de 2 segundos
-      />
+      /> */}
 
       {/* mensaje al presionar "cancelar" */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
