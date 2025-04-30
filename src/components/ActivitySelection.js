@@ -58,7 +58,7 @@ function ActivitySelection() {
       </Typography>
 
       {/* Lista de actividades contenida en la estructura Box */}
-      <Box sx={{ width: '80%', maxWidth: 500, margin: '0 auto' }}>
+      <Box sx={{ width: '80%', maxWidth: 500, margin: '0 auto'}}>
         <List>
           {availableActivities.map((activity) => ( //mostrar actividades disponibles
             <ListItem
@@ -97,7 +97,7 @@ function ActivitySelection() {
           Guardar y volver
         </Button>
         {/* Botón para cancelar */}
-        <Button onClick={handleCancel} color="secondary" style={{ marginLeft: '20px' }}>
+        <Button onClick={handleCancel} style={{ backgroundColor: '#DC143C', color: 'white', marginLeft: '20px' }}>
           Cancelar
         </Button>
       </div>
