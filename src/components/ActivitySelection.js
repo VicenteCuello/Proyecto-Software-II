@@ -57,7 +57,7 @@ function ActivitySelection() {
     setOpenDialog(true);
   };
 
-  const handleClearActivities = () => {
+  const handleEliminarActivities = () => {
     setActivities([]);
     const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
     delete savedActivities[date]; // elimina las actividades guardadas para la fecha actual
@@ -112,13 +112,10 @@ function ActivitySelection() {
           Cancelar
         </Button>
         {activities.length > 0 && (
-          <Button onClick={handleClearActivities} style={{ marginLeft: '20px' }}>
+          <Button onClick={handleEliminarActivities} style={{ marginLeft: '20px' }}>
             Cancelar actividades
           </Button>
         )}
-        {/*<Button onClick={handleClearActivities} style={{ marginLeft: '20px' }}>
-         Cancelar todas las actividades
-        </Button>*/}
       </div>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
