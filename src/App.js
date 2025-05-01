@@ -3,9 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 import CalendarComponent from './components/CalendarComponent';
-import ActivitySelection from './components/ActivitySelection'; // Nueva pantalla
-import ManualWeather from './ManualWeather';
-
+import ActivitySelection from './components/ActivitySelection';
+import ManualWeather from './components/ManualWeather';
 
 function App() {
   return (
@@ -14,12 +13,15 @@ function App() {
         <Routes>
           <Route path="/" element={<CalendarComponent />} />
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
-          <ManualWeather /> 
         </Routes>
+        <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000 }}>
+          <ManualWeather />
+        </div>
       </Router>
     </ThemeProvider>
   );
 }
 
 export default App;
+
 
