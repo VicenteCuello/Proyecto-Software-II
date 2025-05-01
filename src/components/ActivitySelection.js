@@ -4,9 +4,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle } from '@mui/icons-material';
 
 function ActivitySelection() {
-  const { date } = useParams();
+  const { date } = useParams(); 
   const navigate = useNavigate();
 
+  /*el estado activities comienza con las actividades guardadas en la 
+   fecha date si es que hay */
   const [activities, setActivities] = useState(() => {
     const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
     return savedActivities[date] || [];
@@ -15,16 +17,17 @@ function ActivitySelection() {
   const [openDialog, setOpenDialog] = useState(false);
 
   const availableActivities = [
-    { name: 'Yoga', image: '/images/yoga.webp' },
-    { name: 'Correr', image: '/images/correr.webp' },
-    { name: 'Leer', image: '/images/leer.webp' },
-    { name: 'Estudiar React', image: '/images/estudiar react.webp' },
-    { name: 'Ir al cine', image: '/images/ir al cine.webp' },
-    { name: 'Ir al gym', image: '/images/ir al gym.webp' },
-    { name: 'Ir de compras', image: '/images/Ir de compras.webp' },
-    { name: 'Cocinar', image: '/images/cocinar.webp' }
+    { name: 'Yoga', image: '/images/yoga.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla']},
+    { name: 'Correr', image: '/images/correr.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'viento', 'niebla'] },
+    { name: 'Leer', image: '/images/leer.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
+    { name: 'Estudiar React', image: '/images/estudiar react.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
+    { name: 'Ir al cine', image: '/images/ir al cine.webp', temperatura: [18, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
+    { name: 'Ir al gym', image: '/images/ir al gym.webp', temperatura: [16, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla', 'viento', 'niebla'] },
+    { name: 'Ir de compras', image: '/images/Ir de compras.webp', temperatura: [15, 23], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
+    { name: 'Cocinar', image: '/images/cocinar.webp', temperatura: [18, 23], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] }
   ];
 
+  /*agregar o quitar actividades del estado activities*/
   const toggleActivity = (activity) => {
     setActivities((prev) =>
       prev.includes(activity)
@@ -32,7 +35,8 @@ function ActivitySelection() {
         : [...prev, activity]
     );
   };
-
+/*se guardan la actividades selecciondas en localStorage con la clave 
+ activitiesByDate y vuelve al calendario */
   const handleSave = () => {
     const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
     savedActivities[date] = activities;
@@ -51,6 +55,14 @@ function ActivitySelection() {
 
   const handleCancel = () => {
     setOpenDialog(true);
+  };
+
+  const handleClearActivities = () => {
+    setActivities([]);
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    delete savedActivities[date]; // elimina las actividades guardadas para la fecha actual
+    localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
+    navigate('/');
   };
 
   return (
@@ -99,6 +111,14 @@ function ActivitySelection() {
         <Button onClick={handleCancel} color="secondary" style={{ marginLeft: '20px' }}>
           Cancelar
         </Button>
+        {activities.length > 0 && (
+          <Button onClick={handleClearActivities} style={{ marginLeft: '20px' }}>
+            Cancelar actividades
+          </Button>
+        )}
+        {/*<Button onClick={handleClearActivities} style={{ marginLeft: '20px' }}>
+         Cancelar todas las actividades
+        </Button>*/}
       </div>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
