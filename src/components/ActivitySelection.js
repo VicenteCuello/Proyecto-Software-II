@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { Button, Snackbar, Typography, List, ListItem, ListItemIcon, ListItemText, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle } from '@mui/icons-material'; // Icono para seleccionar actividad
+import { CheckCircle } from '@mui/icons-material';
 
 function ActivitySelection() {
   const { date } = useParams();
   const navigate = useNavigate();
-  const [activities, setActivities] = useState([]); //activities es el array del usuario
-  //const [openSnackbar, setOpenSnackbar] = useState(false); //para cuando selecciona "guardar"
-  const [openDialog, setOpenDialog] = useState(false); // para cuando selecciona volver
 
-  const availableActivities = [ //array de actividades disponibles con su nombre y elemento grafico
+  const [activities, setActivities] = useState(() => {
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    return savedActivities[date] || [];
+  });
+
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const availableActivities = [
     { name: 'Yoga', image: '/images/yoga.webp' },
     { name: 'Correr', image: '/images/correr.webp' },
     { name: 'Leer', image: '/images/leer.webp' },
@@ -20,7 +24,7 @@ function ActivitySelection() {
     { name: 'Ir de compras', image: '/images/Ir de compras.webp' },
     { name: 'Cocinar', image: '/images/cocinar.webp' }
   ];
-//funcion para agregar y/o eliminar actividades:
+
   const toggleActivity = (activity) => {
     setActivities((prev) =>
       prev.includes(activity)
@@ -28,27 +32,25 @@ function ActivitySelection() {
         : [...prev, activity]
     );
   };
-//funcion para volver al calendario al presionar guardar: 
+
   const handleSave = () => {
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    savedActivities[date] = activities;
+    localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
+
     console.log(`Actividades registradas para ${date}:`, activities);
-    navigate('/'); // Volver al calendario
-    //setOpenSnackbar(true); //mensaje de confirmacion al guardar actividades
-    /*setTimeout(() => {
-      setOpenSnackbar(false);
-      navigate('/'); //volver al calendario
-    }, 1000); *///mensaje se muestra por un segundo (tiempo de espera)
+    navigate('/');
   };
 
-  //volver al calendario si se confirma "cancelar"
   const handleDialogClose = (shouldNavigate) => {
     setOpenDialog(false);
-    if (shouldNavigate) { //si confirma cancelar vuelve al calendario
-      navigate('/'); 
+    if (shouldNavigate) {
+      navigate('/');
     }
   };
-//cuando se presiona cancelar
+
   const handleCancel = () => {
-    setOpenDialog(true); // Mostrar el diálogo de confirmación
+    setOpenDialog(true);
   };
 
   return (
@@ -57,10 +59,9 @@ function ActivitySelection() {
         Seleccionar actividades para {date}
       </Typography>
 
-      {/* Lista de actividades contenida en la estructura Box */}
       <Box sx={{ width: '80%', maxWidth: 500, margin: '0 auto' }}>
         <List>
-          {availableActivities.map((activity) => ( //mostrar actividades disponibles
+          {availableActivities.map((activity) => (
             <ListItem
               key={activity.name}
               button
@@ -87,29 +88,19 @@ function ActivitySelection() {
       </Box>
 
       <div style={{ textAlign: 'center', marginTop: '40px' }}>
-        {/* Botón para guardar y volver */}
         <Button
           variant="contained"
           color="primary"
           onClick={handleSave}
-          disabled={activities.length === 0} // que no se pueda seleccionar si no elige ninguna actividad
+          disabled={activities.length === 0}
         >
           Guardar y volver
         </Button>
-        {/* Botón para cancelar */}
         <Button onClick={handleCancel} color="secondary" style={{ marginLeft: '20px' }}>
           Cancelar
         </Button>
       </div>
-      
-      {/* mensaje al confirmar actividades seleccionadas ("guardar") 
-      <Snackbar
-        open={openSnackbar}
-        message="Actividades guardadas con éxito"
-        autoHideDuration={2000} // Se cierra automáticamente después de 2 segundos
-      /> */}
 
-      {/* mensaje al presionar "cancelar" */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>¡Atención!</DialogTitle>
         <DialogContent>
@@ -131,4 +122,3 @@ function ActivitySelection() {
 }
 
 export default ActivitySelection;
-
