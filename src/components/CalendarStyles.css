@@ -69,8 +69,8 @@
   
   /* Sábado (último día de la semana laboral) */
   .react-calendar__month-view__days__day--weekend:nth-child(7n + 6) {
-    background-color: #1a2253b7; /* Color azul claro para sábados */
-    background-color: #121435ae;
+    background-color: #1a2253b7;
+    background-color: #1a2253b7;
     color: #fff;
   }
   
