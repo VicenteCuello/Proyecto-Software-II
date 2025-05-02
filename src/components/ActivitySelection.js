@@ -57,17 +57,9 @@ function ActivitySelection() {
     setOpenDialog(true);
   };
 
-  const handleEliminarActivities = () => {
-    setActivities([]);
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    delete savedActivities[date]; // elimina las actividades guardadas para la fecha actual
-    localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
-    navigate('/');
-  };
-
   return (
-    <div style={{ padding: '30px' }}>
-      <Typography variant="h4" align="center" gutterBottom>
+    <Box sx={{ padding: '30px', backgroundColor: '#5767d0', minHeight: '100vh'}}>
+      <Typography variant="h4" align="center" gutterBottom  sx={{ color: '#eeeff9', fontSize: '32px', fontWeight: 'bold'}}>
         Seleccionar actividades para {date}
       </Typography>
 
@@ -80,42 +72,45 @@ function ActivitySelection() {
               onClick={() => toggleActivity(activity.name)}
               sx={{
                 padding: '10px 20px',
-                backgroundColor: activities.includes(activity.name) ? '#e3f2fd' : 'transparent',
+                marginBottom: '2px',
+                backgroundColor: activities.includes(activity.name) ? '#7532b0' : 'transparent',
                 borderRadius: '4px',
-                '&:hover': { backgroundColor: '#f1f1f1' },
+                '&:hover': { backgroundColor: '#821add' },
               }}
             >
               <ListItemIcon>
                 <img
                   src={activity.image}
                   alt={activity.name}
-                  style={{ width: 40, height: 40, objectFit: 'contain' }}
+                  style={{ width: 45, height: 45, objectFit: 'contain' }}
                 />
               </ListItemIcon>
-              <ListItemText primary={activity.name} />
+              <ListItemText primary={<Typography sx={{ color: '#eeeff9', fontSize: '20px', fontWeight: 'bold', }}>{activity.name}</Typography>} 
+              />
+              {/*<ListItemText primary={activity.name} sx={{ color: 'white'}}/>*/}
               {activities.includes(activity.name) && <CheckCircle color="primary" />}
             </ListItem>
           ))}
         </List>
       </Box>
 
-      <div style={{ textAlign: 'center', marginTop: '40px' }}>
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <Button
           variant="contained"
-          color="primary"
           onClick={handleSave}
-          disabled={activities.length === 0}
+          sx={{
+            backgroundColor: '#232b60', 
+            color: '#fff',           // Color del texto 
+          }}
         >
           Guardar y volver
         </Button>
-        <Button onClick={handleCancel} color="secondary" style={{ marginLeft: '20px' }}>
-          Cancelar
+        <Button 
+          variant="contained"
+          color= 'error'
+          onClick={handleCancel}  style={{ marginLeft: '20px' }}>
+          Cancelar cambios
         </Button>
-        {activities.length > 0 && (
-          <Button onClick={handleEliminarActivities} style={{ marginLeft: '20px' }}>
-            Cancelar actividades
-          </Button>
-        )}
       </div>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
@@ -134,8 +129,9 @@ function ActivitySelection() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 }
 
 export default ActivitySelection;
+

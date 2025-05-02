@@ -38,7 +38,7 @@ function ManualWeather() {
   };
 
   return (
-    <div style={{ padding: "1rem", border: "1px solid #ccc", borderRadius: "8px", width: "300px", margin: "auto" }}>
+    <div style={{ padding: "1rem", border: "1px solid #ccc", borderRadius: "8px", width: "300px", backgroundColor: "#ffffff", margin: "auto" }}>
       <h2>Ingresa el clima de hoy</h2>
       <form onSubmit={handleSubmit}>
         <div>
