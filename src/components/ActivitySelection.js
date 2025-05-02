@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { Button, Snackbar, Typography, List, ListItem, ListItemIcon, ListItemText, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
+import {
+  Button, Snackbar, Typography, List, ListItem, ListItemIcon, ListItemText,
+  Dialog, DialogActions, DialogContent, DialogTitle, Box
+} from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle } from '@mui/icons-material';
+import { useNotification } from './NotificationContext'; // ✅ Importación del contexto
 
 function ActivitySelection() {
-  const { date } = useParams(); 
+  const { date } = useParams();
   const navigate = useNavigate();
+  const { showNotification } = useNotification(); // ✅ Hook para notificaciones
 
-  /*el estado activities comienza con las actividades guardadas en la 
-   fecha date si es que hay */
   const [activities, setActivities] = useState(() => {
     const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
     return savedActivities[date] || [];
@@ -22,12 +25,11 @@ function ActivitySelection() {
     { name: 'Leer', image: '/images/leer.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
     { name: 'Estudiar React', image: '/images/estudiar react.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
     { name: 'Ir al cine', image: '/images/ir al cine.webp', temperatura: [18, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
-    { name: 'Ir al gym', image: '/images/ir al gym.webp', temperatura: [16, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla', 'viento', 'niebla'] },
+    { name: 'Ir al gym', image: '/images/ir al gym.webp', temperatura: [16, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
     { name: 'Ir de compras', image: '/images/Ir de compras.webp', temperatura: [15, 23], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
     { name: 'Cocinar', image: '/images/cocinar.webp', temperatura: [18, 23], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] }
   ];
 
-  /*agregar o quitar actividades del estado activities*/
   const toggleActivity = (activity) => {
     setActivities((prev) =>
       prev.includes(activity)
@@ -35,14 +37,30 @@ function ActivitySelection() {
         : [...prev, activity]
     );
   };
-/*se guardan la actividades selecciondas en localStorage con la clave 
- activitiesByDate y vuelve al calendario */
+
   const handleSave = () => {
     const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
     savedActivities[date] = activities;
     localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
 
-    console.log(`Actividades registradas para ${date}:`, activities);
+    // Aquí podrías obtener clima desde localStorage si ManualWeather lo guarda ahí
+    const weather = JSON.parse(localStorage.getItem('manualWeather')) || { estado: 'soleado', temperatura: 20 };
+
+    const inadecuadas = activities.filter(actName => {
+      const act = availableActivities.find(a => a.name === actName);
+      return (
+        !act.estado.includes(weather.estado) ||
+        weather.temperatura < act.temperatura[0] ||
+        weather.temperatura > act.temperatura[1]
+      );
+    });
+
+    if (inadecuadas.length > 0) {
+      showNotification('⚠️ Algunas actividades pueden no ser adecuadas por el clima.', 'warning');
+    } else {
+      showNotification('✅ Actividades guardadas y apropiadas para el clima.', 'success');
+    }
+
     navigate('/');
   };
 
@@ -55,6 +73,15 @@ function ActivitySelection() {
 
   const handleCancel = () => {
     setOpenDialog(true);
+  };
+
+  const handleEliminarActivities = () => {
+    setActivities([]);
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    delete savedActivities[date];
+    localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
+    showNotification('🗑️ Actividades canceladas.', 'info');
+    navigate('/');
   };
 
   return (
