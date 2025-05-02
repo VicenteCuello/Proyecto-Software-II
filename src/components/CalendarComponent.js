@@ -21,8 +21,8 @@ function CalendarComponent() {
         flexDirection: 'column',
         justifyContent:  'center',
         alignItems: 'center', // Centra el calendario verticalmente
-        height: '100vh', // Hace que el div ocupe toda la altura de la ventana
-        backgroundColor: '#07498d', // Fija la imagen al fondo mientras se desplaza
+        height: '100vh', 
+        backgroundColor: '#07498d', 
       }}
     >
       <h1 className="titulo-calendario">Selecciona una fecha para agendar</h1>

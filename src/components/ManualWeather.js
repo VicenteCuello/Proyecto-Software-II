@@ -38,7 +38,7 @@ function ManualWeather() {
   };
 
   return (
-    <div style={{ padding: "1rem", border: "1px solid #ccc", borderRadius: "8px", width: "300px", backgroundColor: "#ffffff", margin: "auto" }}>
+    <div style={{ padding: "1rem", border: "1px solid #ccc", borderRadius: "8px", width: "300px", backgroundColor: "#78baff", margin: "auto", fontFamily: "'Quicksand', sans-serif" }}>
       <h2>Ingresa el clima de hoy</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -51,7 +51,7 @@ function ManualWeather() {
             required
             style={{ width: "100%", marginBottom: "10px" }}
           />
-          <small style={{ display: "block", marginTop: "5px", fontStyle: "italic", color: "#555" }}>
+          <small style={{ display: "block", marginTop: "5px", fontStyle: "italic", color: "#555"}}>
             (Ejemplos: Soleado, Lluvioso, Nublado, Tormenta, Nieve, Viento, Niebla)
           </small>
         </div>
