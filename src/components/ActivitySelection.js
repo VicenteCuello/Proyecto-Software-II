@@ -123,7 +123,7 @@ function ActivitySelection() {
       />
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>¡Atención!</DialogTitle>
+        <DialogTitle>¡Advertencia!</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
             ¿Seguro que deseas cancelar?
