@@ -1,21 +1,31 @@
+/*titulo del calendario*/
+.titulo-calendario {
+  margin-bottom: 20px;
+  color: #fff8f8;
+  font-family: "Quicksand", sans-serif;
+  font-size: 25px;
+  font-weight: bold;
+}
+
 /* Fondo general del calendario */
 .react-calendar {
     background-color: #1d60a3b9;
     border-radius: 12px;
     border: 1px solid #fcded9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Arial', sans-serif;
+    font-family: 'Inter', sans-serif;
     padding: 16px;
   }
   
   /* Casillas de días */
   .react-calendar__tile {
-    background-color: #919de9;
-    color: #dddada;
+    background-color: #9da8ee;
+    color: #efe8e8;
+    font-size: 15px;
     border-radius: 50px;
     margin: 4px;
     transition: all 0.3s ease;
-  }
+  } 
   
   /* Hover en los días */
   .react-calendar__tile:hover {
@@ -50,5 +60,17 @@
   
   .react-calendar__navigation button:hover {
     background-color: #f9dad2;
+  }
+
+  .react-calendar__month-view__days__day--weekend:nth-child(7n) {
+    background-color: #1a2253b7; /* Color rojo claro para domingos */
+    color: #ffffff;
+  }
+  
+  /* Sábado (último día de la semana laboral) */
+  .react-calendar__month-view__days__day--weekend:nth-child(7n + 6) {
+    background-color: #1a2253b7;
+    background-color: #1a2253b7;
+    color: #fff;
   }
   
