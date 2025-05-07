@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 
 function ManualWeather() {
   const [weather, setWeather] = useState('');
@@ -6,6 +6,7 @@ function ManualWeather() {
   const [submitted, setSubmitted] = useState(false);
   const [emoji, setEmoji] = useState('🌤️'); // Valor por defecto
   const [boxColor, setBoxColor] = useState('white'); // Color inicial del cuadro
+  
 
   const availableActivities = [
     { name: 'Yoga', image: '/images/yoga.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla']},
@@ -48,6 +49,7 @@ function ManualWeather() {
     return 'white'; // Cuadro blanco por defecto
   };
 
+
   // Lógica para determinar qué actividades se pueden realizar
   const getAvailableActivities = () => {
     return availableActivities.filter((activity) => {
@@ -78,13 +80,13 @@ function ManualWeather() {
             onChange={(e) => setWeather(e.target.value)}
             placeholder="Ej: Soleado, Lluvioso, Nublado, Tormenta..."
             required
-            style={{ width: "100%", marginBottom: "5px" }}
+            style={{ width: "100%", marginBottom: "5px"}}
           />
           <small style={{ 
             display: "block", 
             marginTop: "5px", 
             fontStyle: "italic", 
-            color: "#555"
+            color: "#000"
           }}>
             (Ejemplos: Soleado, Lluvioso, Nublado, Tormenta, Nieve, Viento, Niebla)
           </small>
@@ -120,6 +122,7 @@ function ManualWeather() {
             <p style={{ margin: "8px 0" }}>🌡️ {temperature} °C</p>
           </div>
   
+ 
           {/* Box para mostrar actividades realizables */}
           <div
             style={{
@@ -164,7 +167,6 @@ function ManualWeather() {
 }
 
 export default ManualWeather;
-
 
 
 /*import React, { useState } from 'react';
