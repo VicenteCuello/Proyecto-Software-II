@@ -1,3 +1,8 @@
+html, body {
+  height: 100%;
+  background-color: #07498d;
+  margin: 0;
+}
 /*titulo del calendario*/
 .titulo-calendario {
   margin-bottom: 20px;
@@ -75,7 +80,7 @@
     color: #fff;
   }
   
-  /* ESTILOS NUEVOS (SOLO LO QUE NECESITAS) */
+  /* para tener circulo que indica que hay actividades agendadas en un dia*/
 .activity-indicator {
   position: absolute;
   top: 5px;
