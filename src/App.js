@@ -15,14 +15,19 @@ function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path="/" element={<CalendarComponent />} />
+          <Route path="/" element={
+            <>
+            <CalendarComponent />
+            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000 }}>
+              <ManualWeather />
+            </div>
+            </>
+          } />
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/notifications" element={<NotificationsPage/>} /> {/* ⬅️ Agregado */}
           <Route path="/weather" element={<WeatherPage />} /> {/* Nueva ruta de clima */}
       </Routes>
-        <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000 }}>
-          <ManualWeather />
-        </div>
+        
       </Router>
     </ThemeProvider>
   );

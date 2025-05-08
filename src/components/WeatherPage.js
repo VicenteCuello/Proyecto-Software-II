@@ -37,7 +37,7 @@ function WeatherPage() {
         <div style={{ marginTop: 20 }}>
           <h2>{weather.name}</h2>
           <p>Temperatura: {weather.main.temp}°C</p>
-          <p>Clima: {weather.weather[0].description}</p>
+          <p>Clima: {weather.weather[0].main}</p>
         </div>
       )}
     </div>
