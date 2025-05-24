@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 import CalendarComponent from './components/CalendarComponent';
@@ -9,30 +9,53 @@ import NotificationsPage from './components/Notification'; // ⬅️ Asegúrate 
 import WeatherPage from './components/WeatherPage'; // <-- IMPORTA el nuevo componente
 import { useState } from 'react';
 import { getWeatherByCity } from './api/weather';
+import Button from '@mui/material/Button';
+
+function Main() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+        <Link to="/calendar">
+          <Button variant="contained" color="primary">
+            Ir al Calendario
+          </Button>
+        </Link>
+      </div>
+      <ManualWeather />
+    </div>
+  );
+}
+
+function CalendarPage() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+        <Link to="/">
+          <Button variant="contained" color="primary">
+            Volver al Clima
+          </Button>
+        </Link>
+      </div>
+      <CalendarComponent />
+    </div>
+  );
+}
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path="/" element={
-            <>
-            <CalendarComponent />
-            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000 }}>
-              <ManualWeather />
-            </div>
-            </>
-          } />
+          <Route path="/" element={<Main />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
-          <Route path="/notifications" element={<NotificationsPage/>} /> {/* ⬅️ Agregado */}
-          <Route path="/weather" element={<WeatherPage />} /> {/* Nueva ruta de clima */}
-      </Routes>
-        
+        </Routes>
       </Router>
     </ThemeProvider>
   );
 }
 
 export default App;
+
 
 
