@@ -4,13 +4,54 @@ import theme from './theme';
 import CalendarComponent from './components/CalendarComponent';
 import ActivitySelection from './components/ActivitySelection';
 import ManualWeather from './components/ManualWeather';
-import NotificationsPage from './components/Notification'; // asegurate que la ruta es correcta
-import WeatherPage from './components/WeatherPage';
-import WeatherStart from './components/WeatherStart';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
 import { useState } from 'react';
-import Button from '@mui/material/Button';
+
+// Componente Sidebar
+function Sidebar({ options }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
+  };
+
+  return (
+    <>
+      {/* Botón para abrir la barra lateral */}
+      <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+        <IconButton onClick={toggleDrawer(true)}>
+          <MenuIcon />
+        </IconButton>
+      </div>
+
+      {/* Barra lateral */}
+      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
+        <List>
+          {options.map((option, index) => (
+            <ListItem key={index}>
+              <ListItemButton component={Link} to={option.path}>
+                <ListItemText primary={option.label} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+    </>
+  );
+}
 
 function Main() {
+  const options = [
+    { label: 'Ir al Calendario', path: '/calendar' },
+    { label: 'Actividades Favoritas', path: '/select-activities/favorites' },
+  ];
+
   return (
     <div
       style={{
@@ -21,29 +62,15 @@ function Main() {
         justifyContent: 'center',
       }}
     >
-      {/* Botón en la esquina superior izquierda */}
-      <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-        <Link to="/select-activities/favorites">
-          <Button variant="contained" color="primary">
-            Actividades Favoritas
-          </Button>
-        </Link>
-      </div>
-
-      {/* Botón en la esquina superior derecha */}
-      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-        <Link to="/calendar">
-          <Button variant="contained" color="primary">
-            Ir al Calendario
-          </Button>
-        </Link>
-      </div>
+      <Sidebar options={options} />
       <ManualWeather />
     </div>
   );
 }
 
 function CalendarPage() {
+  const options = [{ label: 'Volver al Clima', path: '/' }];
+
   return (
     <div
       style={{
@@ -54,13 +81,7 @@ function CalendarPage() {
         justifyContent: 'center',
       }}
     >
-      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-        <Link to="/">
-          <Button variant="contained" color="primary">
-            Volver al Clima
-          </Button>
-        </Link>
-      </div>
+      <Sidebar options={options} />
       <CalendarComponent />
     </div>
   );
@@ -84,3 +105,4 @@ function App() {
 }
 
 export default App;
+
