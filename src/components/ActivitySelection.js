@@ -44,7 +44,7 @@ function ActivitySelection() {
     setOpenSnackbar(true); //mensaje de confirmacion al guardar actividades
     setTimeout(() => {
       setOpenSnackbar(false);
-      navigate('/'); //volver al calendario
+      navigate('/calendar'); //volver al calendario
     }, 1000); //mensaje se muestra por un segundo (tiempo de espera)
     //navigate('/');
   };
