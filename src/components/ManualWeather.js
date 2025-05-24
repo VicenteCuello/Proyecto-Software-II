@@ -151,13 +151,21 @@ function ManualWeather() {
 
       {submitted && (
         <>
+
+          <div style={{ margin: "8px 16px", border: "1px solid #4CAF50", borderRadius: "8px", backgroundColor: boxColor, textAlign: "center" }}>
+            <h3>{apiCity ? `Clima de Hoy en ${apiCity}` : inputCity ? `Clima de Hoy en ${inputCity}` : 'Clima de Hoy'}</h3>
+            <p style={{ fontSize: "2rem" }}>{emoji}</p>
+            <p>{weather}</p>
+            <p>🌡️ {temperature} °C</p>
+          </div>
+          {/*
           <div style={{ margin: "8px 16px", border: "1px solid #4CAF50", borderRadius: "8px", backgroundColor: boxColor, textAlign: "center" }}>
             <h3>{apiCity  ? `Clima de Hoy en ${apiCity }` : 'Clima de Hoy'}</h3>
             <p style={{ fontSize: "2rem" }}>{emoji}</p>
             <p>{weather}</p>
             <p>🌡️ {temperature} °C</p>
           </div>
-
+              */}
           <div style={{ margin: "8px 16px 16px 16px", border: "1px solid #4CAF50", borderRadius: "8px", backgroundColor: "#eaf7e1", textAlign: "center", minHeight: "200px" }}>
             <h4>Actividades realizables:</h4>
             {actividadesFiltradas.length > 0 ? (
@@ -188,7 +196,6 @@ function ManualWeather() {
 }
 
 export default ManualWeather;
-
 
 
 /*import React, { useState } from 'react';

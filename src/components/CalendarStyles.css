@@ -1,3 +1,8 @@
+html, body {
+  height: 100%;
+  background-color: #07498d;
+  margin: 0;
+}
 /*titulo del calendario*/
 .titulo-calendario {
   margin-bottom: 20px;
@@ -22,9 +27,10 @@
     background-color: #9da8ee;
     color: #efe8e8;
     font-size: 15px;
-    border-radius: 50px;
+    border-radius: 20px;
     margin: 4px;
     transition: all 0.3s ease;
+    position: relative; /* Añadido para posicionar el círculo */
   } 
   
   /* Hover en los días */
@@ -74,3 +80,19 @@
     color: #fff;
   }
   
+  /* para tener circulo que indica que hay actividades agendadas en un dia*/
+.activity-indicator {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 8px;
+  height: 8px;
+  background-color: #2b0653;
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+
+.react-calendar__tile abbr {
+  display: inline-block;
+  margin-top: 2px; /* Pequeño ajuste para evitar solapamiento */
+}
