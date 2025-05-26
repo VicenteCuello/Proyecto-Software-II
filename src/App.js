@@ -7,6 +7,7 @@ import ActivitySelection from './components/ActivitySelection';
 import ManualWeather from './components/ManualWeather';
 import NotificationsPage from './components/Notification'; // ⬅️ Asegúrate de que la ruta sea correcta
 import WeatherPage from './components/WeatherPage'; // <-- IMPORTA el nuevo componente
+import WeatherStart from './components/WeatherStart';
 import { useState } from 'react';
 import { getWeatherByCity } from './api/weather';
 
@@ -20,6 +21,9 @@ function App() {
             <CalendarComponent />
             <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000 }}>
               <ManualWeather />
+            </div>
+            <div style={{ position: 'absolute', top: '10px', left: '1200px', zIndex: 1000 }}>
+              <WeatherStart />
             </div>
             </>
           } />
