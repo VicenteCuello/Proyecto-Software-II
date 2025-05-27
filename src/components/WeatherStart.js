@@ -20,7 +20,7 @@ function WeatherStart() {
   const [emoji, setEmoji] = useState('🌤️');
   const [boxColor, setBoxColor] = useState('white');
   const [submitted, setSubmitted] = useState(false);
-  const [forecast, setForecast] = useState({}); // pronóstico agrupado
+  const [forecast, setForecast] = useState({}); // pronóstico proximos días
 
   const traducirMainClima = (main) => {
     const traducciones = {
@@ -80,7 +80,7 @@ function WeatherStart() {
       setBoxColor(getBoxColor(climaTraducido));
       setSubmitted(true);
 
-      // Traemos el forecast
+      // datos de forecast
       const forecastData = await getForecastByCity(nombreCiudad);
       const agrupado = agruparForecastPorDia(forecastData.list);
       setForecast(agrupado);
@@ -91,10 +91,10 @@ function WeatherStart() {
     }
   }, []);
 
-  // Agrupa la lista del forecast por fecha (YYYY-MM-DD)
+  // agrupar datos po día
   const agruparForecastPorDia = (lista) => {
     return lista.reduce((acc, item) => {
-      const fecha = item.dt_txt.split(' ')[0]; // extraemos solo fecha
+      const fecha = item.dt_txt.split(' ')[0]; // sacar la fecha
       if (!acc[fecha]) acc[fecha] = [];
       acc[fecha].push(item);
       return acc;
@@ -113,11 +113,11 @@ function WeatherStart() {
     }
   };
 
-  // Renderiza cada bloque horario de forecast con MUI Card pequeña
+  // card para cada intervalo
   const renderPronosticoHorario = (item) => {
     const clima = traducirMainClima(item.weather[0].main);
     const temp = item.main.temp.toFixed(1);
-    const hora = item.dt_txt.split(' ')[1].slice(0, 5); // HH:mm
+    const hora = item.dt_txt.split(' ')[1].slice(0, 5); 
     const emojiLocal = getEmoji(clima);
 
     return (
