@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getWeatherByCity, getForecastByCity } from '../api/weather';
+import { getWeatherByCity} from '../api/weather';
 
 function ManualWeather() {
   const [inputCity, setInputCity] = useState('');
