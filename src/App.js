@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
@@ -5,14 +6,11 @@ import theme from './theme';
 import CalendarComponent from './components/CalendarComponent';
 import ActivitySelection from './components/ActivitySelection';
 import ManualWeather from './components/ManualWeather';
-<<<<<<< HEAD
-=======
 import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
 import WeatherCurrentLocation from './components/WeatherCurrentLocation';
 
->>>>>>> a7bf6d73 (Integración del clima por ubicación actual)
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
@@ -20,7 +18,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { useState } from 'react';
 
 // Componente Sidebar
 function Sidebar({ options }) {
@@ -32,7 +29,7 @@ function Sidebar({ options }) {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+      <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 2000 }}>
         <IconButton onClick={toggleDrawer(true)}>
           <MenuIcon />
         </IconButton>
@@ -41,8 +38,8 @@ function Sidebar({ options }) {
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
         <List>
           {options.map((option, index) => (
-            <ListItem key={index}>
-              <ListItemButton component={Link} to={option.path}>
+            <ListItem key={index} disablePadding>
+              <ListItemButton component={Link} to={option.path} onClick={toggleDrawer(false)}>
                 <ListItemText primary={option.label} />
               </ListItemButton>
             </ListItem>
@@ -115,7 +112,3 @@ function App() {
 }
 
 export default App;
-<<<<<<< HEAD
-
-=======
->>>>>>> a7bf6d73 (Integración del clima por ubicación actual)
