@@ -57,13 +57,14 @@ function Main() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: '200vh',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
       <Sidebar options={options} />
-      <ManualWeather />
+      <WeatherStart />
+
     </div>
   );
 }
