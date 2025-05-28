@@ -21,7 +21,9 @@ function WeatherStart() {
   const [boxColor, setBoxColor] = useState('white');
   const [submitted, setSubmitted] = useState(false);
   const [forecast, setForecast] = useState({}); // pronóstico proximos días
-
+  const [humedad, setHumidity] = useState('');
+  const [nubosidad, setClouds] = useState('');
+  const [viento, setWind] = useState('');
   const traducirMainClima = (main) => {
     const traducciones = {
       Thunderstorm: 'tormenta',
@@ -76,6 +78,9 @@ function WeatherStart() {
       setCiudad(data.name);
       setWeather(climaTraducido);
       setTemperature(data.main.temp.toFixed(1));
+      setHumidity(data.main.humidity);
+      setClouds(data.clouds.all);
+      setWind(data.wind.speed);
       setEmoji(getEmoji(climaTraducido));
       setBoxColor(getBoxColor(climaTraducido));
       setSubmitted(true);
@@ -148,7 +153,7 @@ function WeatherStart() {
   return (
     <Box
       sx={{
-        maxWidth: 600,
+        maxWidth: 1000,
         margin: '16px auto',
         padding: 2,
         borderRadius: 2,
@@ -191,6 +196,9 @@ function WeatherStart() {
               {weather}
             </Typography>
             <Typography variant="h6">🌡️ {temperature} °C</Typography>
+            <Typography variant="body2">💧 Humedad: {humedad}%</Typography>
+            <Typography variant="body2">☁️ Nubosidad: {nubosidad}%</Typography>
+            <Typography variant="body2">💨 Viento: {viento} m/s</Typography>
           </Card>
 
           <Box sx={{ mb: 2 }}>
@@ -200,12 +208,18 @@ function WeatherStart() {
               return (
                 <Box key={fecha} sx={{ mb: 3 }}>
                   <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
-                    {new Date(fecha).toLocaleDateString(undefined, {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    {(() => {
+                      const temps = forecast[fecha];
+                      const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
+                      const maxTemp = Math.max(...temps.map(item => item.main.temp_max)).toFixed(1);
+                      const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      });
+                      return `${fechaFormateada} (🌡️ mín: ${minTemp}°C / máx: ${maxTemp}°C)`;
+                    })()}
                   </Typography>
                   <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
                     {forecast[fecha].map(renderPronosticoHorario)}
