@@ -1,83 +1,18 @@
-import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
-
 import CalendarComponent from './components/CalendarComponent';
 import ActivitySelection from './components/ActivitySelection';
 import ManualWeather from './components/ManualWeather';
-import NotificationsPage from './components/Notification';
-import WeatherPage from './components/WeatherPage';
+import NotificationsPage from './components/Notification'; // ⬅️ Asegúrate de que la ruta sea correcta
+import WeatherPage from './components/WeatherPage'; // <-- IMPORTA el nuevo componente
 import WeatherStart from './components/WeatherStart';
-import WeatherCurrentLocation from './components/WeatherCurrentLocation';
+import { useState } from 'react';
+import { getWeatherByCity } from './api/weather';
+import Button from '@mui/material/Button';
 
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-
-// Componente Sidebar
-function Sidebar({ options }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const toggleDrawer = (open) => () => {
-    setDrawerOpen(open);
-  };
-
-  return (
-    <>
-      <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 2000 }}>
-        <IconButton onClick={toggleDrawer(true)}>
-          <MenuIcon />
-        </IconButton>
-      </div>
-
-      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-        <List>
-          {options.map((option, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton component={Link} to={option.path} onClick={toggleDrawer(false)}>
-                <ListItemText primary={option.label} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-    </>
-  );
-}
 
 function Main() {
-  const options = [
-    { label: 'Ir al Calendario', path: '/calendar' },
-    { label: 'Actividades Favoritas', path: '/select-activities/favorites' },
-  ];
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '200vh',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Sidebar options={options} />
-      <WeatherStart />
-      <div style={{ marginTop: 20 }}>
-        <WeatherCurrentLocation />
-      </div>
-    </div>
-  );
-}
-
-function CalendarPage() {
-  const options = [{ label: 'Volver al Clima', path: '/' }];
-
   return (
     <div
       style={{
@@ -88,7 +23,46 @@ function CalendarPage() {
         justifyContent: 'center',
       }}
     >
-      <Sidebar options={options} />
+      {/* Botón en la esquina superior izquierda */}
+      <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+        <Link to="/select-activities/favorites">
+          <Button variant="contained" color="primary">
+            Actividades Favoritas
+          </Button>
+        </Link>
+      </div>
+
+      {/* Botón en la esquina superior derecha */}
+      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+        <Link to="/calendar">
+          <Button variant="contained" color="primary">
+            Ir al Calendario
+          </Button>
+        </Link>
+      </div>
+      <ManualWeather />
+    </div>
+  );
+}
+
+function CalendarPage() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+        <Link to="/">
+          <Button variant="contained" color="primary">
+            Volver al Clima
+          </Button>
+        </Link>
+      </div>
       <CalendarComponent />
     </div>
   );
@@ -99,12 +73,19 @@ function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path="/" element={<Main />} />
-          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/" element={
+            <>
+            <CalendarComponent />
+            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000 }}>
+              <ManualWeather />
+            </div>
+            <div style={{ position: 'absolute', top: '10px', left: '1200px', zIndex: 1000 }}>
+              <WeatherStart />
+            </div>
+            </>
+          } />
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/select-activities/favorites" element={<ActivitySelection />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/weather" element={<WeatherPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
@@ -112,3 +93,7 @@ function App() {
 }
 
 export default App;
+
+
+
+
