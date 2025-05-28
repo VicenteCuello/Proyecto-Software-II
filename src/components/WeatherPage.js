@@ -1,6 +1,6 @@
-// src/pages/WeatherPage.js
-// src/pages/WeatherPage.js
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { getWeatherByCity, getForecastByCity } from '../api/weather';
 
 function WeatherPage() {
@@ -8,19 +8,239 @@ function WeatherPage() {
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
 
-  const handleSearch = async () => {
+  const handleSearch = async (ciudadABuscar) => {
     try {
-      const actual = await getWeatherByCity(city);
-      const pronostico = await getForecastByCity(city);
+      const actual = await getWeatherByCity(ciudadABuscar);
+      const pronostico = await getForecastByCity(ciudadABuscar);
       setWeather(actual);
       setForecast(pronostico.list);
+      setCity(ciudadABuscar);
     } catch (error) {
       alert('No se pudo obtener el clima.');
     }
   };
 
+  const obtenerCiudadPorUbicacion = () => {
+    if (!navigator.geolocation) {
+      return Promise.reject('Geolocalización no soportada');
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { latitude, longitude } = pos.coords;
+            const response = await axios.get(
+              'https://nominatim.openstreetmap.org/reverse',
+              {
+                params: {
+                  format: 'json',
+                  lat: latitude,
+                  lon: longitude,
+                },
+              }
+            );
+
+            const address = response.data.address;
+            const ciudad =
+              address.city || address.town || address.village || null;
+            if (ciudad) resolve(ciudad);
+            else reject('No se pudo detectar ciudad');
+          } catch (e) {
+            reject('Error obteniendo ciudad desde coordenadas');
+          }
+        },
+        () => reject('Permiso denegado para obtener ubicación')
+      );
+    });
+  };
+
+  useEffect(() => {
+    obtenerCiudadPorUbicacion()
+      .then((ciudadDetectada) => {
+        setCity(ciudadDetectada);
+        handleSearch(ciudadDetectada);
+      })
+      .catch(() => {
+        const ciudadPorDefecto = 'Concepción';
+        setCity(ciudadPorDefecto);
+        handleSearch(ciudadPorDefecto);
+      });
+  }, []);
+
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') handleSearch();
+    if (e.key === 'Enter') handleSearch(city);
+  };
+
+  // Resto del código para resumen y renderizado...
+
+  const calcularResumenDelDia = (bloques) => {
+    const tempPromedio =
+      bloques.reduce((sum, b) => sum + b.main.temp, 0) / bloques.length;
+
+    const estados = bloques.reduce((acc, b) => {
+      const estado = b.weather[0].main;
+      acc[estado] = (acc[estado] || 0) + 1;
+      return acc;
+    }, {});
+
+    const estadoDominante = Object.entries(estados).sort(
+      (a, b) => b[1] - a[1]
+    )[0][0];
+
+    return {
+      tempPromedio: tempPromedio.toFixed(1),
+      estado: estadoDominante,
+    };
+  };
+
+  const ahora = new Date();
+  const bloquesFuturos = forecast.filter(
+    (item) => new Date(item.dt_txt) > ahora
+  );
+
+  const forecastByDay = bloquesFuturos.reduce((acc, item) => {
+    const fecha = item.dt_txt.split(' ')[0];
+    if (!acc[fecha]) acc[fecha] = [];
+    acc[fecha].push(item);
+    return acc;
+  }, {});
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>Consulta el Clima</h1>
+      <input
+        type="text"
+        placeholder="Escribe una ciudad"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        onKeyDown={handleKeyPress}
+      />
+      <button onClick={() => handleSearch(city)}>Buscar</button>
+
+      {weather && (
+        <div style={{ marginTop: 20 }}>
+          <h2>Ahora en {weather.name}</h2>
+          <p>Temperatura: {weather.main.temp}°C</p>
+          <p>Clima: {weather.weather[0].description}</p>
+          <p>Humedad: {weather.main.humidity}%</p>
+          <p>Viento: {weather.wind.speed} m/s</p>
+        </div>
+      )}
+
+      {forecast.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <h3>Próximos bloques de 3h</h3>
+          {bloquesFuturos.slice(0, 8).map((item, i) => (
+            <div key={i}>
+              {new Date(item.dt_txt).toLocaleString(undefined, {
+                weekday: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}{' '}
+              - {item.main.temp}°C, {item.weather[0].description}
+            </div>
+          ))}
+
+          <h3>Resumen de los próximos días</h3>
+          {Object.entries(forecastByDay).map(([fecha, bloques]) => {
+            const resumen = calcularResumenDelDia(bloques);
+            return (
+              <div key={fecha}>
+                <strong>{fecha}</strong>: {resumen.tempPromedio}°C, {resumen.estado}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default WeatherPage;
+
+
+
+
+/*
+// src/pages/WeatherPage.js
+// src/pages/WeatherPage.js
+import React,{ useState, useEffect } from 'react';
+import axios from 'axios';
+import { getWeatherByCity, getForecastByCity } from '../api/weather';
+
+
+function WeatherPage() {
+  const [city, setCity] = useState('');
+  const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState([]);
+
+  const handleSearch = async (ciudadABuscar) => {
+    try {
+      const actual = await getWeatherByCity(ciudadABuscar);
+      const pronostico = await getForecastByCity(ciudadABuscar);
+      setWeather(actual);
+      setForecast(pronostico.list);
+      setCity(ciudadABuscar);
+    } catch (error) {
+      alert('No se pudo obtener el clima.');
+    }
+  };
+
+
+  // Función para obtener ciudad desde geolocalización
+  const obtenerCiudadPorUbicacion = () => {
+    if (!navigator.geolocation) {
+      return Promise.reject('Geolocalización no soportada');
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { latitude, longitude } = pos.coords;
+            const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+              params: {
+                format: 'json',
+                lat: latitude,
+                lon: longitude,
+              },
+            });
+
+            const address = response.data.address;
+            // city, town o village según lo que devuelva la API
+            const ciudad =
+              address.city || address.town || address.village || null;
+            if (ciudad) resolve(ciudad);
+            else reject('No se pudo detectar ciudad');
+          } catch (e) {
+            reject('Error obteniendo ciudad desde coordenadas');
+          }
+        },
+        () => reject('Permiso denegado para obtener ubicación')
+      );
+    });
+  };
+
+  // useEffect para obtener ciudad y buscar clima al montar
+  useEffect(() => {
+    obtenerCiudadPorUbicacion()
+      .then((ciudadDetectada) => {
+        setCity(ciudadDetectada);
+        // Cuando city cambie, puedes llamar handleSearch para cargar clima
+        // O llamarlo directamente aquí
+        // Aquí llamamos directamente
+        handleSearch(ciudadDetectada);
+      })
+      .catch(() => {
+        setCity('Concepción'); // ciudad por defecto
+        handleSearch('Concepción');
+      });
+  }, []);
+
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSearch(ciudadDetectada);
   };
 
   const calcularResumenDelDia = (bloques) => {
@@ -64,7 +284,7 @@ function WeatherPage() {
         onChange={(e) => setCity(e.target.value)}
         onKeyDown={handleKeyPress}
       />
-      <button onClick={handleSearch}>Buscar</button>
+      <button onClick={handleSearch()}>Buscar</button>
 
       {weather && (
         <div style={{ marginTop: 20 }}>
@@ -106,7 +326,7 @@ function WeatherPage() {
 
 export default WeatherPage;
 
-/*import React, { useState } from 'react';
+mport React, { useState } from 'react';
 import { getWeatherByCity, getForecastByCity } from '../api/weather';
 
 function WeatherPage() {

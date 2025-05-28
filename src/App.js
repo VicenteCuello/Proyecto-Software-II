@@ -1,9 +1,18 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
+
 import CalendarComponent from './components/CalendarComponent';
 import ActivitySelection from './components/ActivitySelection';
 import ManualWeather from './components/ManualWeather';
+<<<<<<< HEAD
+=======
+import NotificationsPage from './components/Notification';
+import WeatherPage from './components/WeatherPage';
+import WeatherStart from './components/WeatherStart';
+import WeatherCurrentLocation from './components/WeatherCurrentLocation';
+
+>>>>>>> a7bf6d73 (Integración del clima por ubicación actual)
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
@@ -23,14 +32,12 @@ function Sidebar({ options }) {
 
   return (
     <>
-      {/* Botón para abrir la barra lateral */}
       <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
         <IconButton onClick={toggleDrawer(true)}>
           <MenuIcon />
         </IconButton>
       </div>
 
-      {/* Barra lateral */}
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
         <List>
           {options.map((option, index) => (
@@ -64,7 +71,9 @@ function Main() {
     >
       <Sidebar options={options} />
       <WeatherStart />
-
+      <div style={{ marginTop: 20 }}>
+        <WeatherCurrentLocation />
+      </div>
     </div>
   );
 }
@@ -106,4 +115,7 @@ function App() {
 }
 
 export default App;
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7bf6d73 (Integración del clima por ubicación actual)

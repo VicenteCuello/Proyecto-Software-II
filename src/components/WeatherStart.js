@@ -7,9 +7,7 @@ import {
   Button,
   Typography,
   Card,
-  CardContent,
   Stack,
-  Chip,
 } from '@mui/material';
 
 function WeatherStart() {
