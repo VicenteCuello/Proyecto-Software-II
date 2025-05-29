@@ -59,7 +59,7 @@ function WeatherStart() {
 
   const getBoxColor = (weather) => {
     const w = weather.toLowerCase();
-    if (w.includes('sol')) return '#FFF9C4';       // amarillo claro
+    if (w.includes('sol')) return '#f3e87b';       // amarillo claro
     if (w.includes('lluvia')) return '#B3E5FC';    // azul claro
     if (
       w.includes('nublado') ||
@@ -67,7 +67,7 @@ function WeatherStart() {
       w.includes('viento') ||
       w.includes('nieve')
     )
-      return '#CFD8DC';  // gris claro
+      return '#57687a';  // gris claro
     return '#FFFFFF';     // blanco
   };
 
@@ -124,6 +124,7 @@ function WeatherStart() {
     const temp = item.main.temp.toFixed(1);
     const hora = item.dt_txt.split(' ')[1].slice(0, 5); 
     const emojiLocal = getEmoji(clima);
+    const lluvia = Math.round((item.pop || 0) * 100); 
 
     return (
       <Card
@@ -146,7 +147,13 @@ function WeatherStart() {
           {clima}
         </Typography>
         <Typography variant="body2">🌡️ {temp}°C</Typography>
-      </Card>
+        <Typography variant="caption" sx={{ color: '#FFFF' }}>
+          🌧️ {lluvia}% 
+        </Typography>
+        <Typography variant="caption" sx={{ color: '#FFFF' }}>
+           💨 {item.wind.speed} m/s
+        </Typography>
+        </Card>
     );
   };
 
@@ -185,6 +192,33 @@ function WeatherStart() {
 
       {submitted && (
         <>
+          <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+            {/* temperatura y estado climático del día actual */}
+            <Card sx={{ flex: 1, backgroundColor: boxColor, textAlign: 'center', p: 2 }} elevation={4}>
+              <Typography variant="h6" gutterBottom>
+                Clima de Hoy en {ciudad}
+              </Typography>
+              <Typography variant="h2" component="p" sx={{ lineHeight: 1 }}>
+                {emoji}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                {weather}
+              </Typography>
+              <Typography variant="h6">🌡️ {temperature} °C</Typography>
+            </Card>
+
+            {/* datos del clima actual */}
+            <Card sx={{ flex: 1, backgroundColor: '#437ebb', textAlign: 'center', padding: '16px' }} elevation={4}>
+              <Typography variant="h6" gutterBottom>
+                Detalles del clima
+              </Typography>
+              <Typography variant="body1">💧 Humedad: {humedad}%</Typography>
+              <Typography variant="body1">☁️ Nubosidad: {nubosidad}%</Typography>
+              <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
+            </Card>
+          </Stack>
+
+          {/*
           <Card sx={{ mb: 3, backgroundColor: boxColor, textAlign: 'center', p: 2 }} elevation={4}>
             <Typography variant="h6" gutterBottom>
               Clima de Hoy en {ciudad}
@@ -200,14 +234,14 @@ function WeatherStart() {
             <Typography variant="body2">☁️ Nubosidad: {nubosidad}%</Typography>
             <Typography variant="body2">💨 Viento: {viento} m/s</Typography>
           </Card>
-
+*/}
           <Box sx={{ mb: 2 }}>
             {Object.keys(forecast).map((fecha) => {
               if (fecha === Object.keys(forecast)[0]) return null; // saltamos el día actual
 
               return (
                 <Box key={fecha} sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1, color: 'black' }}>
                     {(() => {
                       const temps = forecast[fecha];
                       const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
