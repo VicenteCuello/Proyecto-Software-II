@@ -19,30 +19,30 @@ function WeatherStart() {
   const [weather, setWeather] = useState('');
   const [temperature, setTemperature] = useState('');
   const [emoji, setEmoji] = useState('🌤️');
-  const [boxColor, setBoxColor] = useState('white');
+  //const [boxColor, setBoxColor] = useState('white');
   const [submitted, setSubmitted] = useState(false); //si se ingresa o envía una ciudad
   const [forecast, setForecast] = useState({}); // pronóstico proximos días
   const [humedad, setHumidity] = useState('');
   const [nubosidad, setClouds] = useState('');
   const [viento, setWind] = useState('');
-  
+  const [icono, setIcono] = useState('');
   const traducirMainClima = (main) => {
     const traducciones = {
-      Thunderstorm: 'tormenta',
-      Drizzle: 'lluvia',
-      Rain: 'lluvia',
-      Snow: 'nieve',
-      Clear: 'soleado',
-      Clouds: 'nublado',
-      Mist: 'niebla',
-      Smoke: 'niebla',
-      Haze: 'niebla',
-      Dust: 'niebla',
-      Fog: 'niebla',
-      Sand: 'niebla',
-      Ash: 'niebla',
-      Squall: 'viento',
-      Tornado: 'tormenta',
+      Thunderstorm: 'Tormenta',
+      Drizzle: 'Lluvia',
+      Rain: 'Lluvia',
+      Snow: 'Nieve',
+      Clear: 'Soleado',
+      Clouds: 'Nublado',
+      Mist: 'Niebla',
+      Smoke: 'Niebla',
+      Haze: 'Niebla',
+      Dust: 'Niebla',
+      Fog: 'Niebla',
+      Sand: 'Niebla',
+      Ash: 'Niebla',
+      Squall: 'Viento',
+      Tornado: 'Tormenta',
     };
     return traducciones[main] || main.toLowerCase();
   };
@@ -60,6 +60,7 @@ function WeatherStart() {
   };
 
   //color de fondo para las cards
+  /*
   const getBoxColor = (weather) => {
     const w = weather.toLowerCase();
     if (w.includes('sol')) return '#f3e87b';       // amarillo claro
@@ -73,7 +74,7 @@ function WeatherStart() {
       return '#57687a';  // gris claro
     return '#FFFFFF';     // blanco
   };
-
+*/
 
   const obtenerClimaPorCiudad = useCallback(async (nombreCiudad) => {
     try {
@@ -87,7 +88,9 @@ function WeatherStart() {
       setClouds(data.clouds.all);
       setWind(data.wind.speed);
       setEmoji(getEmoji(climaTraducido));
-      setBoxColor(getBoxColor(climaTraducido));
+      //icono que proporciona la API
+      setIcono(data.weather[0].icon); 
+      //setBoxColor(getBoxColor(climaTraducido));
       setSubmitted(true);
 
       // clima de los siguientes días, datos de forecast
@@ -139,30 +142,45 @@ function WeatherStart() {
       <Card
         key={item.dt}
         sx={{
-          minWidth: 70,
+          minWidth: 50,
+          //width: '70px',  
           marginRight: 1,
-          backgroundColor: getBoxColor(clima),
+          //backgroundColor: getBoxColor(clima),
+          backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)',
+          //backgroundColor: '#3e538b',
           textAlign: 'center',
-          paddingY: 1,
+          //paddingY: 1,
+          paddingY: "2px",
           paddingX: 0.5,
+          color: 'white',
         }}
         elevation={2}
       >
         <Typography variant="body2">{hora}</Typography>
+        <Box component="img"
+            src={`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`}
+            alt={item.weather[0].description}
+            sx={{ width: 40, height: 40 }}
+        />
+        {/* 
         <Typography variant="h5" component="div" sx={{ lineHeight: 1 }}>
           {emojiLocal}
         </Typography>
-        <Typography variant="caption" display="block" gutterBottom>
-          {clima}
-        </Typography>
-        <Typography variant="body2">🌡️ {temp}°C</Typography>
+        */}
+        <Box display="flex" flexDirection="column">
+          <Typography variant="caption" display="block" gutterBottom >
+            {clima}
+          </Typography>
+          <Typography variant="caption">🌡️ {temp}°C</Typography>
+        </Box>
         <Typography variant="caption" sx={{ color: '#FFFF' }}>
           🌧️ {lluvia}% 
         </Typography>
         <Typography variant="caption" sx={{ color: '#FFFF' }}>
-           💨 {item.wind.speed} m/s
+          💨 {item.wind.speed} m/s
         </Typography>
-        </Card>
+        
+      </Card>
     );
   };
 
@@ -178,15 +196,15 @@ function WeatherStart() {
         maxWidth: 1000,
         //width: 'valorpx',
         //hegiht: 'valorpx',
-        //backgroundImage: 'url(/images/clima.jpg)',
-        //backgroundSize: 'cover',
-        //backgroundPosition: 'center',
-        //backgroundRepeat: 'no-repeat',
+        backgroundImage: 'url(/images/clima.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         margin: '16px auto',
         padding: 2,
         borderRadius: 2,
-        backgroundColor: '#78baff',
-        fontFamily: "'Quicksand', sans-serif",
+        //backgroundColor: '#78baff',
+        fontFamily: "'Roboto', sans-serif",
         boxShadow: 3,
       }}
     >
@@ -196,42 +214,73 @@ function WeatherStart() {
 
       <form onSubmit={handleSubmit}>
         {/*agrupar elementos de forma vertical*/}
-        <Stack direction="column" spacing={2} sx={{ mb: 3 }}>
+        <Stack direction="column" spacing={2} sx={{ mb: 3}}>
           {/*campo para ingresar ciudad */}
           <TextField
             label="Ingresa la ciudad"
+            
             variant="outlined"
             size="small"
             fullWidth
             value={inputCity}
             onChange={(e) => setInputCity(e.target.value)}
             placeholder="Ej: Madrid"
+            sx={{
+              input: {color: 'white'},           // color del texto ingresado
+              '& label': {
+                color: 'white',
+              },
+            }}
           />
           <Button variant="contained" sx={{width: '200px', height: '30px', fontSize: '18px', borderRadius: '12px'}} type="submit" >
             Mostrar clima
           </Button>
         </Stack>
       </form>
-      {/*mostrar card con el clima aactual */}
+      {/*mostrar card con el clima actual */}
       {submitted && (
         <>
           <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
             {/* temperatura y estado climático del día actual */}
-            <Card sx={{ flex: 1, backgroundColor: boxColor, textAlign: 'center', p: 2 }} elevation={4}>
+            <Card sx={{width: '200px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', p: 2, color: 'white', }} elevation={4}>
               <Typography variant="h6" gutterBottom>
                  {ciudad}
               </Typography>
+              <Box display="flex" alignItems="center" gap={0}>
+                <Typography variant="h3"> {temperature}°</Typography>
+                {icono && (
+                <Box
+                  component="img"
+                  src={`https://openweathermap.org/img/wn/${icono}@2x.png`}
+                  alt={weather}
+                  sx={{ width: 80, height: 80 }}
+                />
+               )}
+              </Box>
+              {/* 
+              {icono && (
+                <Box
+                  component="img"
+                  src={`https://openweathermap.org/img/wn/${icono}@2x.png`}
+                  alt={weather}
+                  sx={{ width: 80, height: 80 }}
+                />
+              )}
+                */}
+              {/*
               <Typography variant="h2" component="p" sx={{ lineHeight: 1 }}>
                 {emoji}
-              </Typography>
+              </Typography> */}
+              {/*
               <Typography variant="body1" sx={{ mb: 1 }}>
                 {weather}
               </Typography>
               <Typography variant="h6">🌡️ {temperature} °C</Typography>
-            </Card>
+            */}
+              </Card>
 
             {/* datos del clima actual */}
-            <Card sx={{ flex: 1, backgroundColor: '#437ebb', textAlign: 'center', padding: '16px' }} elevation={4}>
+            <Card sx={{width: '200px', backgroundColor: '#437ebb', textAlign: 'center', padding: '16px' }} elevation={4}>
               <Typography variant="h6" gutterBottom>
                 Detalles del clima
               </Typography>
@@ -244,7 +293,7 @@ function WeatherStart() {
           <Box sx={{ mb: 2 }}>
             {diasPronostico.map((fecha) => (
               <Box key={fecha} sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, color: 'black' }}>
+                <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
                   {(() => {
                     const temps = forecast[fecha];
                     const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
