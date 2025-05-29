@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getWeatherByCity, getForecastByCity } from '../api/weather';
+import React, { useState, useEffect, useCallback } from 'react'; //maejar variables, ejecutar código, memorizar funciones
+import { getWeatherByCity, getForecastByCity } from '../api/weather'; //llamadas a la API
 
 import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Card,
-  CardContent,
-  Stack,
-  Chip,
+  Box, //contenedor
+  TextField, //campo de texto
+  Button, //boton
+  Typography, //texto con estilos
+  Card, //tarjeta con bordes y sombra
+  CardContent, //interior de la tarjeta
+  Stack, //organizar algo horizontal o verticalmente
+  Chip, //teiqueta redondeada para mostrar información
 } from '@mui/material';
 
+//actualizar estados del componente (estado actual, funcion para actualizar estado = valor de inicio)
 function WeatherStart() {
   const [inputCity, setInputCity] = useState('');
   const [ciudad, setCiudad] = useState('');
@@ -19,11 +20,12 @@ function WeatherStart() {
   const [temperature, setTemperature] = useState('');
   const [emoji, setEmoji] = useState('🌤️');
   const [boxColor, setBoxColor] = useState('white');
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(false); //si se ingresa o envía una ciudad
   const [forecast, setForecast] = useState({}); // pronóstico proximos días
   const [humedad, setHumidity] = useState('');
   const [nubosidad, setClouds] = useState('');
   const [viento, setWind] = useState('');
+  
   const traducirMainClima = (main) => {
     const traducciones = {
       Thunderstorm: 'tormenta',
@@ -57,6 +59,7 @@ function WeatherStart() {
     return '🌤️';
   };
 
+  //color de fondo para las cards
   const getBoxColor = (weather) => {
     const w = weather.toLowerCase();
     if (w.includes('sol')) return '#f3e87b';       // amarillo claro
@@ -71,8 +74,10 @@ function WeatherStart() {
     return '#FFFFFF';     // blanco
   };
 
+
   const obtenerClimaPorCiudad = useCallback(async (nombreCiudad) => {
     try {
+      //onbtener datos del clima actual
       const data = await getWeatherByCity(nombreCiudad);
       const climaTraducido = traducirMainClima(data.weather[0].main);
       setCiudad(data.name);
@@ -85,10 +90,10 @@ function WeatherStart() {
       setBoxColor(getBoxColor(climaTraducido));
       setSubmitted(true);
 
-      // datos de forecast
+      // clima de los siguientes días, datos de forecast
       const forecastData = await getForecastByCity(nombreCiudad);
-      const agrupado = agruparForecastPorDia(forecastData.list);
-      setForecast(agrupado);
+      const datosAgrupados = agruparForecastPorDia(forecastData.list);
+      setForecast(datosAgrupados);
     } catch (error) {
       alert('No se pudo obtener el clima para esa ciudad.');
       setSubmitted(false);
@@ -96,16 +101,21 @@ function WeatherStart() {
     }
   }, []);
 
-  // agrupar datos po día
+  // agrupar datos-intervalos por día
   const agruparForecastPorDia = (lista) => {
-    return lista.reduce((acc, item) => {
+    //reduce(): recorre el arreglo por item y guarda en acc cada item segun la fecha
+    return lista.reduce((listaPorDia, item) => {
+      //dt_txt es fehca + hora, solo quiero la fecha
       const fecha = item.dt_txt.split(' ')[0]; // sacar la fecha
-      if (!acc[fecha]) acc[fecha] = [];
-      acc[fecha].push(item);
-      return acc;
+      //ve si ya existe la fecha en acc para ver si crear una fila o no
+      if (!listaPorDia[fecha]) listaPorDia[fecha] = [];
+      //guarda el item en la fecha
+      listaPorDia[fecha].push(item);
+      return listaPorDia;
     }, {});
   };
-
+  
+  //mostrar por defecto al inicio el clima de concepción
   useEffect(() => {
     obtenerClimaPorCiudad('Concepción');
   }, [obtenerClimaPorCiudad]);
@@ -124,8 +134,7 @@ function WeatherStart() {
     const temp = item.main.temp.toFixed(1);
     const hora = item.dt_txt.split(' ')[1].slice(0, 5); 
     const emojiLocal = getEmoji(clima);
-    const lluvia = Math.round((item.pop || 0) * 100); 
-
+    const lluvia = Math.round((item.pop || 0) * 100);  
     return (
       <Card
         key={item.dt}
@@ -157,11 +166,12 @@ function WeatherStart() {
     );
   };
 
-  // Extraemos las fechas para pronóstico, excluyendo el día actual, y limitamos a 4 días
-  const fechasPronostico = Object.keys(forecast)
+  // Extraemos los días para el pronóstico, sin el día actual, solo se muestran 4 días exactos
+  const diasPronostico = Object.keys(forecast)
     .filter(fecha => fecha !== Object.keys(forecast)[0])
     .slice(0, 4);
-    
+
+  //mostrar clima  
   return (
     <Box
       sx={{
@@ -185,7 +195,9 @@ function WeatherStart() {
       </Typography>
 
       <form onSubmit={handleSubmit}>
+        {/*agrupar elementos de forma vertical*/}
         <Stack direction="column" spacing={2} sx={{ mb: 3 }}>
+          {/*campo para ingresar ciudad */}
           <TextField
             label="Ingresa la ciudad"
             variant="outlined"
@@ -200,7 +212,7 @@ function WeatherStart() {
           </Button>
         </Stack>
       </form>
-
+      {/*mostrar card con el clima aactual */}
       {submitted && (
         <>
           <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
@@ -228,26 +240,9 @@ function WeatherStart() {
               <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
             </Card>
           </Stack>
-
-          {/*
-          <Card sx={{ mb: 3, backgroundColor: boxColor, textAlign: 'center', p: 2 }} elevation={4}>
-            <Typography variant="h6" gutterBottom>
-              Clima de Hoy en {ciudad}
-            </Typography>
-            <Typography variant="h2" component="p" sx={{ lineHeight: 1 }}>
-              {emoji}
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              {weather}
-            </Typography>
-            <Typography variant="h6">🌡️ {temperature} °C</Typography>
-            <Typography variant="body2">💧 Humedad: {humedad}%</Typography>
-            <Typography variant="body2">☁️ Nubosidad: {nubosidad}%</Typography>
-            <Typography variant="body2">💨 Viento: {viento} m/s</Typography>
-          </Card>
-*/}
+          {/*cards para los siguientes días*/}
           <Box sx={{ mb: 2 }}>
-            {fechasPronostico.map((fecha) => (
+            {diasPronostico.map((fecha) => (
               <Box key={fecha} sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, color: 'black' }}>
                   {(() => {
