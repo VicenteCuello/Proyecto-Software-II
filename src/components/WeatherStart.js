@@ -280,7 +280,7 @@ function WeatherStart() {
               </Card>
 
             {/* datos del clima actual */}
-            <Card sx={{width: '200px', backgroundColor: '#437ebb', textAlign: 'center', padding: '16px' }} elevation={4}>
+            <Card sx={{width: '200px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', padding: '16px', color: 'white' }} elevation={4}>
               <Typography variant="h6" gutterBottom>
                 Detalles del clima
               </Typography>
