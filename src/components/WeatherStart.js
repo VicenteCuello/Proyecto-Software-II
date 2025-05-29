@@ -157,10 +157,21 @@ function WeatherStart() {
     );
   };
 
+  // Extraemos las fechas para pronóstico, excluyendo el día actual, y limitamos a 4 días
+  const fechasPronostico = Object.keys(forecast)
+    .filter(fecha => fecha !== Object.keys(forecast)[0])
+    .slice(0, 4);
+    
   return (
     <Box
       sx={{
         maxWidth: 1000,
+        //width: 'valorpx',
+        //hegiht: 'valorpx',
+        //backgroundImage: 'url(/images/clima.jpg)',
+        //backgroundSize: 'cover',
+        //backgroundPosition: 'center',
+        //backgroundRepeat: 'no-repeat',
         margin: '16px auto',
         padding: 2,
         borderRadius: 2,
@@ -170,7 +181,7 @@ function WeatherStart() {
       }}
     >
       <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
-        Clima
+        Tiempo
       </Typography>
 
       <form onSubmit={handleSubmit}>
@@ -184,7 +195,7 @@ function WeatherStart() {
             onChange={(e) => setInputCity(e.target.value)}
             placeholder="Ej: Madrid"
           />
-          <Button variant="contained" type="submit" fullWidth>
+          <Button variant="contained" sx={{width: '200px', height: '30px', fontSize: '18px', borderRadius: '12px'}} type="submit" >
             Mostrar clima
           </Button>
         </Stack>
@@ -196,7 +207,7 @@ function WeatherStart() {
             {/* temperatura y estado climático del día actual */}
             <Card sx={{ flex: 1, backgroundColor: boxColor, textAlign: 'center', p: 2 }} elevation={4}>
               <Typography variant="h6" gutterBottom>
-                Clima de Hoy en {ciudad}
+                 {ciudad}
               </Typography>
               <Typography variant="h2" component="p" sx={{ lineHeight: 1 }}>
                 {emoji}
@@ -236,31 +247,27 @@ function WeatherStart() {
           </Card>
 */}
           <Box sx={{ mb: 2 }}>
-            {Object.keys(forecast).map((fecha) => {
-              if (fecha === Object.keys(forecast)[0]) return null; // saltamos el día actual
-
-              return (
-                <Box key={fecha} sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1, color: 'black' }}>
-                    {(() => {
-                      const temps = forecast[fecha];
-                      const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
-                      const maxTemp = Math.max(...temps.map(item => item.main.temp_max)).toFixed(1);
-                      const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      });
-                      return `${fechaFormateada} (🌡️ mín: ${minTemp}°C / máx: ${maxTemp}°C)`;
-                    })()}
-                  </Typography>
-                  <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
-                    {forecast[fecha].map(renderPronosticoHorario)}
-                  </Stack>
-                </Box>
-              );
-            })}
+            {fechasPronostico.map((fecha) => (
+              <Box key={fecha} sx={{ mb: 3 }}>
+                <Typography variant="subtitle1" sx={{ mb: 1, color: 'black' }}>
+                  {(() => {
+                    const temps = forecast[fecha];
+                    const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
+                    const maxTemp = Math.max(...temps.map(item => item.main.temp_max)).toFixed(1);
+                    const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    });
+                    return `${fechaFormateada} (🌡️ mín: ${minTemp}°C / máx: ${maxTemp}°C)`;
+                  })()}
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
+                  {forecast[fecha].map(renderPronosticoHorario)}
+                </Stack>
+              </Box>
+            ))}
           </Box>
         </>
       )}
