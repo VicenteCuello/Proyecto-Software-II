@@ -110,7 +110,7 @@ function WeatherStart() {
     return lista.reduce((listaPorDia, item) => {
       //dt_txt es fehca + hora, solo quiero la fecha
       const fecha = item.dt_txt.split(' ')[0]; // sacar la fecha
-      //ve si ya existe la fecha en acc para ver si crear una fila o no
+      //ve si ya existe la fecha en listaPorDia para ver si crear una fila o no
       if (!listaPorDia[fecha]) listaPorDia[fecha] = [];
       //guarda el item en la fecha
       listaPorDia[fecha].push(item);
@@ -200,7 +200,8 @@ function WeatherStart() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        margin: '16px auto',
+        mt: -20,
+        //margin: '16px auto',
         padding: 2,
         borderRadius: 2,
         //backgroundColor: '#78baff',
