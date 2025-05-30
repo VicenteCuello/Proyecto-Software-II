@@ -17,6 +17,7 @@ function WeatherStart() {
   const [inputCity, setInputCity] = useState('');
   const [ciudad, setCiudad] = useState('');
   const [weather, setWeather] = useState('');
+  const [estadoClimatico, setEstadoClimatico] =useState('');
   const [temperature, setTemperature] = useState('');
   const [emoji, setEmoji] = useState('🌤️');
   //const [boxColor, setBoxColor] = useState('white');
@@ -83,6 +84,7 @@ function WeatherStart() {
       const climaTraducido = traducirMainClima(data.weather[0].main);
       setCiudad(data.name);
       setWeather(climaTraducido);
+      setEstadoClimatico(data.weather[0].description);
       setTemperature(data.main.temp.toFixed(1));
       setHumidity(data.main.humidity);
       setClouds(data.clouds.all);
@@ -233,7 +235,7 @@ function WeatherStart() {
               },
             }}
           />
-          <Button variant="contained" sx={{width: '200px', height: '30px', fontSize: '18px', borderRadius: '12px'}} type="submit" >
+          <Button variant="contained" sx={{width: '180px', height: '25px', fontSize: '18px', borderRadius: '10px'}} type="submit" >
             Mostrar clima
           </Button>
         </Stack>
@@ -248,7 +250,7 @@ function WeatherStart() {
                  {ciudad}
               </Typography>
               <Box display="flex" alignItems="center" gap={0}>
-                <Typography variant="h3"> {temperature}°</Typography>
+                <Typography variant="h3"> {temperature}<span style={{ verticalAlign: 'super', fontSize: '22px' }}>°C</span></Typography>
                 {icono && (
                 <Box
                   component="img"
@@ -258,27 +260,10 @@ function WeatherStart() {
                 />
                )}
               </Box>
-              {/* 
-              {icono && (
-                <Box
-                  component="img"
-                  src={`https://openweathermap.org/img/wn/${icono}@2x.png`}
-                  alt={weather}
-                  sx={{ width: 80, height: 80 }}
-                />
-              )}
-                */}
-              {/*
-              <Typography variant="h2" component="p" sx={{ lineHeight: 1 }}>
-                {emoji}
-              </Typography> */}
-              {/*
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                {weather}
+              <Typography variant="body1" sx={{ mb: 1,"&::first-letter": {textTransform: "uppercase"}}}>
+                {estadoClimatico}
               </Typography>
-              <Typography variant="h6">🌡️ {temperature} °C</Typography>
-            */}
-              </Card>
+            </Card>
 
             {/* datos del clima actual */}
             <Card sx={{width: '200px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', padding: '16px', color: 'white' }} elevation={4}>
@@ -305,7 +290,7 @@ function WeatherStart() {
                       month: 'long',
                       day: 'numeric',
                     });
-                    return `${fechaFormateada} (🌡️ mín: ${minTemp}°C / máx: ${maxTemp}°C)`;
+                    return `${fechaFormateada} (🌡️ Mín: ${minTemp}°C - Máx: ${maxTemp}°C)`;
                   })()}
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
