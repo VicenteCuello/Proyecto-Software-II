@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Snackbar, Typography, List, ListItem, ListItemIcon, ListItemText, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle } from '@mui/icons-material';
+import { availableActivities } from '../components/activities';
 
 function ActivitySelection() {
   const { date } = useParams(); 
@@ -18,6 +19,7 @@ function ActivitySelection() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
 
+  /*
   const availableActivities = [
     { name: 'Yoga', image: '/images/yoga.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
     { name: 'Correr', image: '/images/correr.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'viento', 'niebla'] },
@@ -28,6 +30,17 @@ function ActivitySelection() {
     { name: 'Ir de compras', image: '/images/Ir de compras.webp', temperatura: [15, 23], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
     { name: 'Cocinar', image: '/images/cocinar.webp', temperatura: [18, 23], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
   ];
+  */
+
+  React.useEffect(() => {
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    if (date === 'favorites') {
+      setActivities(savedActivities.favorites || []);
+    } else {
+      setActivities(savedActivities[date] || []);
+    }
+  }, [date]);
+
 
   const toggleActivity = (activity) => {
     setActivities((prev) =>
@@ -38,23 +51,27 @@ function ActivitySelection() {
   };
 
   const handleSave = () => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    if (date === 'favorites') {
-      savedActivities.favorites = activities;
-    } else {
-      savedActivities[date] = activities;
+    try {
+      // 1. Obtener datos existentes
+      const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+
+      // 2. Guardar SIEMPRE en `undefined` (elimina otras claves)
+      savedActivities.undefined = activities;
+      delete savedActivities.general; // Elimina si existe
+      delete savedActivities.favorites; // Elimina si existe
+
+      // 3. Actualizar localStorage
+      localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
+      console.log("Actividades guardadas en 'undefined':", activities);
+
+      // 4. Feedback y redirección
+      setOpenSnackbar(true);
+      setTimeout(() => navigate('/'), 1000); // Redirige después de 1 segundo
+
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      alert("Error al guardar. Revisa la consola.");
     }
-    localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
-    console.log(`Actividades registradas para ${date}:`, activities);
-    setOpenSnackbar(true);
-    setTimeout(() => {
-      setOpenSnackbar(false);
-      if (date === 'favorites') {
-        navigate('/'); // Redirige al main para actividades favoritas.
-      } else {
-        navigate('/'); // Redirige al calendario para las fechas.
-      }
-    }, 1000);
   };
 
   const handleDialogClose = (shouldNavigate) => {
@@ -155,3 +172,4 @@ function ActivitySelection() {
 }
 
 export default ActivitySelection;
+export { availableActivities };

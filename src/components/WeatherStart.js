@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'; //maejar variables, ejecutar código, memorizar funciones
 import { getWeatherByCity, getForecastByCity } from '../api/weather'; //llamadas a la API
-
+import { availableActivities } from '../components/activities';
 import {
   Box, //contenedor
   TextField, //campo de texto
@@ -46,6 +46,18 @@ function WeatherStart() {
     };
     return traducciones[main] || main.toLowerCase();
   };
+  /*
+  const availableActivities = [
+    { name: 'Yoga', image: '/images/yoga.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
+    { name: 'Correr', image: '/images/correr.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'viento', 'niebla'] },
+    { name: 'Leer', image: '/images/leer.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
+    { name: 'Estudiar React', image: '/images/estudiar react.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
+    { name: 'Ir al cine', image: '/images/ir al cine.webp', temperatura: [18, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
+    { name: 'Ir al gym', image: '/images/ir al gym.webp', temperatura: [16, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
+    { name: 'Ir de compras', image: '/images/Ir de compras.webp', temperatura: [15, 23], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
+    { name: 'Cocinar', image: '/images/cocinar.webp', temperatura: [18, 23], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
+  ];
+  */
 
   const getEmoji = (weather) => {
     const w = weather.toLowerCase();
@@ -189,7 +201,38 @@ function WeatherStart() {
     .filter(fecha => fecha !== Object.keys(forecast)[0])
     .slice(0, 4);
 
-  //mostrar clima  
+  // Obtener actividades favoritas guardadas por el usuario
+  const activitiesData = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+  const favoritosGuardados = activitiesData.undefined || []; // Solo lee de 'undefined'
+
+  console.log("Favoritos guardados:", favoritosGuardados); // Verifica en consola
+
+  // Filtrar solo las actividades marcadas como favoritas y disponibles en availableActivities
+  const actividadesFavoritas = availableActivities.filter((act) => 
+    favoritosGuardados.some(fav => fav === act.name)
+  );
+
+  const storedData = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+
+  // Mueve 'general' y 'favorites' a 'undefined' (si existen)
+  if (storedData.general || storedData.favorites) {
+    storedData.undefined = [
+      ...(storedData.undefined || []),
+      ...(storedData.general || []),
+      ...(storedData.favorites || [])
+    ];
+    delete storedData.general;
+    delete storedData.favorites;
+    localStorage.setItem('activitiesByDate', JSON.stringify(storedData));
+    console.log("Datos unificados en 'undefined':", storedData.undefined);
+  }
+  //console.log('Actividades favoritas guardadas:', favoritosGuardados);
+
+  console.log('Datos completos de localStorage:', activitiesData);
+  console.log('Actividades combinadas:', favoritosGuardados);
+  console.log('Actividades favoritas encontradas:', actividadesFavoritas);
+
+    //mostrar clima  
   return (
     <Box
       sx={{
@@ -200,7 +243,7 @@ function WeatherStart() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        mt: -20,
+        mt: 65,
         //margin: '16px auto',
         padding: 2,
         borderRadius: 2,
@@ -292,28 +335,72 @@ function WeatherStart() {
           </Stack>
           {/*cards para los siguientes días*/}
           <Box sx={{ mb: 2 }}>
-            {diasPronostico.map((fecha) => (
-              <Box key={fecha} sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
-                  {(() => {
-                    const temps = forecast[fecha];
-                    const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
-                    const maxTemp = Math.max(...temps.map(item => item.main.temp_max)).toFixed(1);
-                    const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    });
-                    return `${fechaFormateada} (🌡️ mín: ${minTemp}°C / máx: ${maxTemp}°C)`;
-                  })()}
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
-                  {forecast[fecha].map(renderPronosticoHorario)}
-                </Stack>
-              </Box>
-            ))}
+            {diasPronostico.map((fecha) => {
+              const temps = forecast[fecha];
+              const minTemp = Math.min(...temps.map(item => item.main.temp_min));
+              const maxTemp = Math.max(...temps.map(item => item.main.temp_max));
+              const estadosDelDia = temps.map(item => item.weather[0].main.toLowerCase());
+              const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+
+              // Filtrar actividades favoritas que cumplan con la temperatura y el estado del día
+              // En WeatherStart.js, modifica esta parte:
+              const actividadesFiltradas = actividadesFavoritas.filter((act) => {
+                const tempOk = minTemp >= act.temperatura[0] && maxTemp <= act.temperatura[1];
+                const climaOk = act.estado.some(e => weather.toLowerCase().includes(e.toLowerCase()));
+                return tempOk && climaOk;
+              });
+
+              /*
+              const actividadesFiltradas = actividadesFavoritas.filter(act =>
+                act.temperatura[0] <= minTemp &&
+                act.temperatura[1] >= maxTemp 
+              );
+              */
+
+              return (
+                <Box key={fecha} sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
+                    {`${fechaFormateada} (🌡️ mín: ${minTemp.toFixed(1)}°C / máx: ${maxTemp.toFixed(1)}°C)`}
+                  </Typography>
+
+                  <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
+                    {forecast[fecha].map(renderPronosticoHorario)}
+                  </Stack>
+
+                  <Typography variant="subtitle2" sx={{ mt: 1, mb: 1, color: 'white' }}>
+                    Actividades favoritas disponibles
+                  </Typography>
+
+                  {actividadesFiltradas.length > 0 ? (
+                    <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
+                      {actividadesFiltradas.map((act) => (
+                        <Box key={act.name} sx={{ textAlign: 'center', color: 'white' }}>
+                          <Box
+                            component="img"
+                            src={act.image}
+                            alt={act.name}
+                            sx={{ width: 50, height: 50, borderRadius: '8px', mb: 0.5 }}
+                          />
+                          <Typography variant="caption">{act.name}</Typography>
+                        </Box>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'lightgray' }}>
+                      No hay actividades favoritas compatibles para este día.
+                    </Typography>
+                  )}
+                </Box>
+              );
+            })}
           </Box>
+
+
         </>
       )}
     </Box>
