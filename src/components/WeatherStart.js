@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'; //maejar variables, ejecutar código, memorizar funciones
-import { getWeatherByCity, getForecastByCity } from '../api/weather'; //llamadas a la API
+import { getWeatherByCity, getForecastByCity, getWeatherByCoords } from '../api/weather'; //llamadas a la API
 
 import {
   Box, //contenedor
@@ -106,6 +106,7 @@ function WeatherStart() {
     }
   }, []);
 
+  
   // agrupar datos-intervalos por día
   const agruparForecastPorDia = (lista) => {
     //reduce(): recorre el arreglo por item y guarda en acc cada item segun la fecha
@@ -121,8 +122,44 @@ function WeatherStart() {
   };
   
   //mostrar por defecto al inicio el clima de concepción
+  {/*
   useEffect(() => {
-    obtenerClimaPorCiudad('Concepción');
+    obtenerClimaPorCiudad('Santiago');
+  }, [obtenerClimaPorCiudad]);
+  */}
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const data = await getWeatherByCoords(latitude, longitude);
+            const climaTraducido = traducirMainClima(data.weather[0].main);
+            setCiudad(data.name);
+            setWeather(climaTraducido);
+            setEstadoClimatico(data.weather[0].description);
+            setTemperature(data.main.temp.toFixed(1));
+            setHumidity(data.main.humidity);
+            setClouds(data.clouds.all);
+            setWind(data.wind.speed);
+            setEmoji(getEmoji(climaTraducido));
+            setIcono(data.weather[0].icon);
+            setSubmitted(true);
+
+            const forecastData = await getForecastByCity(data.name);
+            const datosAgrupados = agruparForecastPorDia(forecastData.list);
+            setForecast(datosAgrupados);
+          } catch (err) {
+            obtenerClimaPorCiudad('Santiago');
+          }
+        },
+        (err) => {
+          obtenerClimaPorCiudad('Santiago');
+        }
+      );
+    } else {
+      obtenerClimaPorCiudad('Santiago');
+    }
   }, [obtenerClimaPorCiudad]);
 
   const handleSubmit = (e) => {
@@ -132,7 +169,7 @@ function WeatherStart() {
       setInputCity('');
     }
   };
-
+  
   // card para cada intervalo
   const renderPronosticoHorario = (item) => {
     const clima = traducirMainClima(item.weather[0].main);
