@@ -128,6 +128,7 @@ function WeatherStart() {
   }, [obtenerClimaPorCiudad]);
   */}
   useEffect(() => {
+    obtenerClimaPorCiudad('Santiago');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -157,9 +158,9 @@ function WeatherStart() {
           obtenerClimaPorCiudad('Santiago');
         }
       );
-    } else {
+    }/* else {
       obtenerClimaPorCiudad('Santiago');
-    }
+    }*/
   }, [obtenerClimaPorCiudad]);
 
   const handleSubmit = (e) => {
