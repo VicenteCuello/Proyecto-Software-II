@@ -121,12 +121,6 @@ function WeatherStart() {
     }, {});
   };
   
-  //mostrar por defecto al inicio el clima de concepción
-  {/*
-  useEffect(() => {
-    obtenerClimaPorCiudad('Santiago');
-  }, [obtenerClimaPorCiudad]);
-  */}
   useEffect(() => {
     obtenerClimaPorCiudad('Santiago');
     if (navigator.geolocation) {
@@ -322,7 +316,9 @@ function WeatherStart() {
                     const temps = forecast[fecha];
                     const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
                     const maxTemp = Math.max(...temps.map(item => item.main.temp_max)).toFixed(1);
-                    const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
+                    const fechaObj = new Date(fecha);
+                    fechaObj.setDate(fechaObj.getDate() + 1); // Sumar 1 día
+                    const fechaFormateada = fechaObj.toLocaleDateString(undefined, {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
