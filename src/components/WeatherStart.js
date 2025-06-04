@@ -106,20 +106,29 @@ function WeatherStart() {
     }
   }, []);
 
-  
-  // agrupar datos-intervalos por día
   const agruparForecastPorDia = (lista) => {
-    //reduce(): recorre el arreglo por item y guarda en acc cada item segun la fecha
     return lista.reduce((listaPorDia, item) => {
-      //dt_txt es fehca + hora, solo quiero la fecha
-      const fecha = item.dt_txt.split(' ')[0]; // sacar la fecha
-      //ve si ya existe la fecha en listaPorDia para ver si crear una fila o no
-      if (!listaPorDia[fecha]) listaPorDia[fecha] = [];
-      //guarda el item en la fecha
-      listaPorDia[fecha].push(item);
+      const fechaUTC = new Date(item.dt * 1000);
+      const fechaClave = fechaUTC.toISOString().split('T')[0]; // "2025-06-05"
+      if (!listaPorDia[fechaClave]) listaPorDia[fechaClave] = [];
+      listaPorDia[fechaClave].push(item);
       return listaPorDia;
     }, {});
   };
+
+  // agrupar datos-intervalos por día
+  //const agruparForecastPorDia = (lista) => {
+    //reduce(): recorre el arreglo por item y guarda en acc cada item segun la fecha
+    //return lista.reduce((listaPorDia, item) => {
+      //dt_txt es fehca + hora, solo quiero la fecha
+      //const fecha = item.dt_txt.split(' ')[0]; // sacar la fecha
+      //ve si ya existe la fecha en listaPorDia para ver si crear una fila o no
+      //if (!listaPorDia[fecha]) listaPorDia[fecha] = [];
+      //guarda el item en la fecha
+      //listaPorDia[fecha].push(item);
+      //return listaPorDia;
+    //}, {});
+  //};
   
   useEffect(() => {
     obtenerClimaPorCiudad('Santiago');
@@ -218,11 +227,13 @@ function WeatherStart() {
     );
   };
 
+  const diasPronostico = Object.keys(forecast).slice(0, 4);
+
   // Extraemos los días para el pronóstico, sin el día actual, solo se muestran 4 días exactos
-  const diasPronostico = Object.keys(forecast)
+  /*const diasPronostico = Object.keys(forecast)
     .filter(fecha => fecha !== Object.keys(forecast)[0])
     .slice(0, 4);
-
+  */
   //mostrar clima  
   return (
     <Box
@@ -316,6 +327,39 @@ function WeatherStart() {
                     const temps = forecast[fecha];
                     const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
                     const maxTemp = Math.max(...temps.map(item => item.main.temp_max)).toFixed(1);
+                    const fechaObj = new Date(fecha + 'T00:00:00');
+                    const fechaFormateada = fechaObj.toLocaleDateString('es-CL', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    });
+                    
+                    /*
+                    const fechaObj = new Date(fecha + 'T00:00:00');
+                    const fechaFormateada = fechaObj.toLocaleDateString('es-CL', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    });*/
+                    /*
+                    const fechaObj = new Date(`${fecha}T00:00:00`);
+                    const fechaFormateada = fechaObj.toLocaleDateString('es-CL', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    });*/
+                    /*
+                    const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    });
+                    */
+                    {/*
                     const fechaObj = new Date(fecha);
                     fechaObj.setDate(fechaObj.getDate() + 1); // Sumar 1 día
                     const fechaFormateada = fechaObj.toLocaleDateString(undefined, {
@@ -323,7 +367,7 @@ function WeatherStart() {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
-                    });
+                    }); */}
                     return `${fechaFormateada} (🌡️ Mín: ${minTemp}°C - Máx: ${maxTemp}°C)`;
                   })()}
                 </Typography>

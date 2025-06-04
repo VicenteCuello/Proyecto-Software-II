@@ -100,6 +100,7 @@ function App() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/select-activities/favorites" element={<ActivitySelection />} />
+          <Route path="/WeatherPage" element={<WeatherPage/>} />
         </Routes>
       </Router>
     </ThemeProvider>
