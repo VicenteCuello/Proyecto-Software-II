@@ -106,29 +106,31 @@ function WeatherStart() {
     }
   }, []);
 
-  const agruparForecastPorDia = (lista) => {
-    return lista.reduce((listaPorDia, item) => {
-      const fechaUTC = new Date(item.dt * 1000);
-      const fechaClave = fechaUTC.toISOString().split('T')[0]; // "2025-06-05"
-      if (!listaPorDia[fechaClave]) listaPorDia[fechaClave] = [];
-      listaPorDia[fechaClave].push(item);
-      return listaPorDia;
-    }, {});
-  };
-
   // agrupar datos-intervalos por día
-  //const agruparForecastPorDia = (lista) => {
-    //reduce(): recorre el arreglo por item y guarda en acc cada item segun la fecha
-    //return lista.reduce((listaPorDia, item) => {
-      //dt_txt es fehca + hora, solo quiero la fecha
-      //const fecha = item.dt_txt.split(' ')[0]; // sacar la fecha
-      //ve si ya existe la fecha en listaPorDia para ver si crear una fila o no
-      //if (!listaPorDia[fecha]) listaPorDia[fecha] = [];
-      //guarda el item en la fecha
-      //listaPorDia[fecha].push(item);
-      //return listaPorDia;
-    //}, {});
-  //};
+  const agruparForecastPorDia = (lista) => {
+    const listaPorDia = lista.reduce((acc, item) => {
+      // Fecha local basada en timestamp
+      const fechaLocal = new Date(item.dt * 1000);
+
+      // Construir clave yyyy-mm-dd con la fecha local
+      const año = fechaLocal.getFullYear();
+      const mes = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+      const dia = String(fechaLocal.getDate()).padStart(2, '0');
+      const fechaClaveLocal = `${año}-${mes}-${dia}`;
+
+      if (!acc[fechaClaveLocal]) acc[fechaClaveLocal] = [];
+      acc[fechaClaveLocal].push({ ...item, horaLocal: fechaLocal });
+
+      return acc;
+    }, {});
+
+    // Ordenar los arrays por hora ascendente dentro de cada día
+    Object.keys(listaPorDia).forEach((fecha) => {
+      listaPorDia[fecha].sort((a, b) => a.horaLocal - b.horaLocal);
+    });
+
+    return listaPorDia;
+  };
   
   useEffect(() => {
     obtenerClimaPorCiudad('Santiago');
@@ -178,7 +180,13 @@ function WeatherStart() {
   const renderPronosticoHorario = (item) => {
     const clima = traducirMainClima(item.weather[0].main);
     const temp = item.main.temp.toFixed(1);
-    const hora = item.dt_txt.split(' ')[1].slice(0, 5); 
+    //const hora = item.dt_txt.split(' ')[1].slice(0, 5); 
+    const hora = new Date(item.dt * 1000).toLocaleTimeString('es-CL', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/Santiago',
+    });
     const emojiLocal = getEmoji(clima);
     const lluvia = Math.round((item.pop || 0) * 100);  
     return (
@@ -226,14 +234,10 @@ function WeatherStart() {
       </Card>
     );
   };
-
-  const diasPronostico = Object.keys(forecast).slice(0, 4);
-
-  // Extraemos los días para el pronóstico, sin el día actual, solo se muestran 4 días exactos
-  /*const diasPronostico = Object.keys(forecast)
-    .filter(fecha => fecha !== Object.keys(forecast)[0])
-    .slice(0, 4);
-  */
+  const diasPronostico = Object.keys(forecast)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .slice(0, 5);
+  
   //mostrar clima  
   return (
     <Box
@@ -334,40 +338,6 @@ function WeatherStart() {
                       month: 'long',
                       day: 'numeric',
                     });
-                    
-                    /*
-                    const fechaObj = new Date(fecha + 'T00:00:00');
-                    const fechaFormateada = fechaObj.toLocaleDateString('es-CL', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    });*/
-                    /*
-                    const fechaObj = new Date(`${fecha}T00:00:00`);
-                    const fechaFormateada = fechaObj.toLocaleDateString('es-CL', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    });*/
-                    /*
-                    const fechaFormateada = new Date(fecha).toLocaleDateString(undefined, {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    });
-                    */
-                    {/*
-                    const fechaObj = new Date(fecha);
-                    fechaObj.setDate(fechaObj.getDate() + 1); // Sumar 1 día
-                    const fechaFormateada = fechaObj.toLocaleDateString(undefined, {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    }); */}
                     return `${fechaFormateada} (🌡️ Mín: ${minTemp}°C - Máx: ${maxTemp}°C)`;
                   })()}
                 </Typography>
