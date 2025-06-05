@@ -60,23 +60,6 @@ function WeatherStart() {
     return '🌤️';
   };
 
-  //color de fondo para las cards
-  /*
-  const getBoxColor = (weather) => {
-    const w = weather.toLowerCase();
-    if (w.includes('sol')) return '#f3e87b';       // amarillo claro
-    if (w.includes('lluvia')) return '#B3E5FC';    // azul claro
-    if (
-      w.includes('nublado') ||
-      w.includes('tormenta') ||
-      w.includes('viento') ||
-      w.includes('nieve')
-    )
-      return '#57687a';  // gris claro
-    return '#FFFFFF';     // blanco
-  };
-*/
-
   const obtenerClimaPorCiudad = useCallback(async (nombreCiudad) => {
     try {
       //onbtener datos del clima actual
@@ -234,10 +217,20 @@ function WeatherStart() {
       </Card>
     );
   };
+
+  //variables para que el pronostico del día actual en forecast se usea en los datos actuales y no abajo
+  const hoy = new Date();
+  const año = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoy.getDate()).padStart(2, '0');
+  const fechaHoy = `${año}-${mes}-${dia}`;
+  const pronosticoHoy = forecast[fechaHoy] || [];
+  //pronostico siguientes días incluido el actual
   const diasPronostico = Object.keys(forecast)
     .sort((a, b) => new Date(a) - new Date(b))
     .slice(0, 5);
-  
+  //pronostico de los siguientes días sin el actual
+  const pronosticoSiguientesDias = diasPronostico.filter(fecha => fecha !== fechaHoy);
   //mostrar clima  
   return (
     <Box
@@ -321,6 +314,28 @@ function WeatherStart() {
               <Typography variant="body1">☁️ Nubosidad: {nubosidad}%</Typography>
               <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
             </Card>
+            {/* Cards pronóstico horario día actual */}
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1,
+                overflowX: 'auto',
+                alignItems: 'center',
+                maxWidth: 500,
+                paddingY: 1,
+                paddingX: 0.5,
+                backgroundColor: 'rgba(0,0,0,0.3)',
+                borderRadius: 1,
+              }}
+            >
+              {pronosticoHoy.length > 0 ? (
+                pronosticoHoy.map(renderPronosticoHorario)
+              ) : (
+                <Typography variant="body2" sx={{ color: 'white', px: 2 }}>
+                  No hay pronóstico para hoy
+                </Typography>
+              )}
+            </Box>
           </Stack>
           {/*cards para los siguientes días*/}
           <Box sx={{ mb: 2 }}>
