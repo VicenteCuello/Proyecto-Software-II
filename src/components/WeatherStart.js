@@ -26,6 +26,7 @@ function WeatherStart() {
   const [humedad, setHumidity] = useState('');
   const [nubosidad, setClouds] = useState('');
   const [viento, setWind] = useState('');
+  const [lluvia, setLluvia] = useState(0);
   const [icono, setIcono] = useState('');
   const traducirMainClima = (main) => {
     const traducciones = {
@@ -72,6 +73,7 @@ function WeatherStart() {
       setHumidity(data.main.humidity);
       setClouds(data.clouds.all);
       setWind(data.wind.speed);
+      setLluvia(data.rain && data.rain['1h'] ? data.rain['1h'] : 0);
       setEmoji(getEmoji(climaTraducido));
       //icono que proporciona la API
       setIcono(data.weather[0].icon); 
@@ -306,13 +308,14 @@ function WeatherStart() {
             </Card>
 
             {/* datos del clima actual */}
-            <Card sx={{width: '200px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', padding: '16px', color: 'white' }} elevation={4}>
+            <Card sx={{width: '250px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', padding: '16px', color: 'white' }} elevation={4}>
               <Typography variant="h6" gutterBottom>
                 Detalles del clima
               </Typography>
               <Typography variant="body1">💧 Humedad: {humedad}%</Typography>
               <Typography variant="body1">☁️ Nubosidad: {nubosidad}%</Typography>
               <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
+              <Typography variant="body1">🌧️ Lluvia (última hora): {lluvia} mm</Typography>
             </Card>
             {/* Cards pronóstico horario día actual */}
             <Box
