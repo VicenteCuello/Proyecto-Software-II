@@ -130,9 +130,7 @@ function WeatherStart() {
           obtenerClimaPorCiudad('Santiago');
         }
       );
-    }/* else {
-      obtenerClimaPorCiudad('Santiago');
-    }*/
+    }
   }, [obtenerClimaPorCiudad]);
 
   const handleSubmit = (e) => {
@@ -159,8 +157,8 @@ function WeatherStart() {
       <Card
         key={item.dt}
         sx={{
-          minWidth: 50,
-          //width: '70px',  
+          minWidth: 110,
+          //width: '150px',  
           marginRight: 1,
           backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)',
           //backgroundColor: '#3e538b',
@@ -185,9 +183,9 @@ function WeatherStart() {
           <Typography variant="caption">🌡️ {temp}°C</Typography>
         </Box>
         <Typography variant="caption" sx={{ color: '#FFFF' }}>
-          🌧️ {lluvia}% 
+          🌧️ {lluvia}%  
         </Typography>
-        <Typography variant="caption" sx={{ color: '#FFFF' }}>
+        <Typography variant="caption" sx={{ color: '#FFFF', marginLeft: '2px' }}>
           💨 {item.wind.speed} m/s
         </Typography>
         
