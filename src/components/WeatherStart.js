@@ -69,8 +69,8 @@ function WeatherStart() {
       setForecast(datosAgrupados);
     } catch (error) {
       alert('No se pudo obtener el clima para esa ciudad.');
-      setSubmitted(false);
-      setForecast({});
+      //setSubmitted(false);
+      //setForecast({});
     }
   }, []);
 
