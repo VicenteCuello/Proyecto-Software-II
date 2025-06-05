@@ -9,7 +9,6 @@ import {
   Card, //tarjeta con bordes y sombra
   CardContent, //interior de la tarjeta
   Stack, //organizar algo horizontal o verticalmente
-  Chip, //teiqueta redondeada para mostrar información
 } from '@mui/material';
 
 //actualizar estados del componente (estado actual, funcion para actualizar estado = valor de inicio)
@@ -19,8 +18,6 @@ function WeatherStart() {
   const [weather, setWeather] = useState('');
   const [estadoClimatico, setEstadoClimatico] =useState('');
   const [temperature, setTemperature] = useState('');
-  const [emoji, setEmoji] = useState('🌤️');
-  //const [boxColor, setBoxColor] = useState('white');
   const [submitted, setSubmitted] = useState(false); //si se ingresa o envía una ciudad
   const [forecast, setForecast] = useState({}); // pronóstico proximos días
   const [humedad, setHumidity] = useState('');
@@ -49,18 +46,6 @@ function WeatherStart() {
     return traducciones[main] || main.toLowerCase();
   };
 
-  const getEmoji = (weather) => {
-    const w = weather.toLowerCase();
-    if (w.includes('sol')) return '☀️';
-    if (w.includes('lluvia')) return '🌧️';
-    if (w.includes('nublado')) return '☁️';
-    if (w.includes('tormenta')) return '⛈️';
-    if (w.includes('nieve')) return '❄️';
-    if (w.includes('viento')) return '🌬️';
-    if (w.includes('niebla')) return '🌫️';
-    return '🌤️';
-  };
-
   const obtenerClimaPorCiudad = useCallback(async (nombreCiudad) => {
     try {
       //onbtener datos del clima actual
@@ -74,10 +59,8 @@ function WeatherStart() {
       setClouds(data.clouds.all);
       setWind(data.wind.speed);
       setLluvia(data.rain && data.rain['1h'] ? data.rain['1h'] : 0);
-      setEmoji(getEmoji(climaTraducido));
       //icono que proporciona la API
       setIcono(data.weather[0].icon); 
-      //setBoxColor(getBoxColor(climaTraducido));
       setSubmitted(true);
 
       // clima de los siguientes días, datos de forecast
@@ -86,8 +69,8 @@ function WeatherStart() {
       setForecast(datosAgrupados);
     } catch (error) {
       alert('No se pudo obtener el clima para esa ciudad.');
-      setSubmitted(false);
-      setForecast({});
+      //setSubmitted(false);
+      //setForecast({});
     }
   }, []);
 
@@ -133,7 +116,6 @@ function WeatherStart() {
             setHumidity(data.main.humidity);
             setClouds(data.clouds.all);
             setWind(data.wind.speed);
-            setEmoji(getEmoji(climaTraducido));
             setIcono(data.weather[0].icon);
             setSubmitted(true);
 
@@ -148,9 +130,7 @@ function WeatherStart() {
           obtenerClimaPorCiudad('Santiago');
         }
       );
-    }/* else {
-      obtenerClimaPorCiudad('Santiago');
-    }*/
+    }
   }, [obtenerClimaPorCiudad]);
 
   const handleSubmit = (e) => {
@@ -172,16 +152,14 @@ function WeatherStart() {
       hour12: false,
       timeZone: 'America/Santiago',
     });
-    const emojiLocal = getEmoji(clima);
     const lluvia = Math.round((item.pop || 0) * 100);  
     return (
       <Card
         key={item.dt}
         sx={{
-          minWidth: 50,
-          //width: '70px',  
+          minWidth: 110,
+          //width: '150px',  
           marginRight: 1,
-          //backgroundColor: getBoxColor(clima),
           backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)',
           //backgroundColor: '#3e538b',
           textAlign: 'center',
@@ -198,11 +176,6 @@ function WeatherStart() {
             alt={item.weather[0].description}
             sx={{ width: 40, height: 40 }}
         />
-        {/* 
-        <Typography variant="h5" component="div" sx={{ lineHeight: 1 }}>
-          {emojiLocal}
-        </Typography>
-        */}
         <Box display="flex" flexDirection="column">
           <Typography variant="caption" display="block" gutterBottom >
             {clima}
@@ -210,9 +183,9 @@ function WeatherStart() {
           <Typography variant="caption">🌡️ {temp}°C</Typography>
         </Box>
         <Typography variant="caption" sx={{ color: '#FFFF' }}>
-          🌧️ {lluvia}% 
+          🌧️ {lluvia}%  
         </Typography>
-        <Typography variant="caption" sx={{ color: '#FFFF' }}>
+        <Typography variant="caption" sx={{ color: '#FFFF', marginLeft: '2px' }}>
           💨 {item.wind.speed} m/s
         </Typography>
         
