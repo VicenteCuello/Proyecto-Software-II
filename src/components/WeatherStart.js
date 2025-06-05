@@ -230,7 +230,7 @@ function WeatherStart() {
   //pronostico siguientes días incluido el actual
   const diasPronostico = Object.keys(forecast)
     .sort((a, b) => new Date(a) - new Date(b))
-    .slice(0, 4);
+    .slice(0, 5);
   //pronostico de los siguientes días sin el actual
   const pronosticoSiguientesDias = diasPronostico.filter(fecha => fecha !== fechaHoy);
   //mostrar clima  
