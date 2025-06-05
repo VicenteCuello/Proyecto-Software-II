@@ -342,7 +342,7 @@ function WeatherStart() {
           </Stack>
           {/*cards para los siguientes días*/}
           <Box sx={{ mb: 2 }}>
-            {diasPronostico.map((fecha) => (
+            {pronosticoSiguientesDias.map((fecha) => (
               <Box key={fecha} sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
                   {(() => {
