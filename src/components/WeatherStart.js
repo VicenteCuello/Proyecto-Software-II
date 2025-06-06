@@ -227,8 +227,8 @@ function WeatherStart() {
         boxShadow: 3,
       }}
     >
-      <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
-        Tiempo
+      <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
+        Buscar una ciudad
       </Typography>
 
       <form onSubmit={handleSubmit}>
@@ -256,6 +256,9 @@ function WeatherStart() {
           </Button>
         </Stack>
       </form>
+      <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
+        Tiempo de hoy
+      </Typography>
       {/*mostrar card con el clima actual */}
       {submitted && (
         <>
@@ -291,29 +294,6 @@ function WeatherStart() {
               <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
               <Typography variant="body1">🌧️ Lluvia (última hora): {lluvia} mm</Typography>
             </Card>
-
-            {/* Cards pronóstico horario día actual */}
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 1,
-                overflowX: 'auto',
-                alignItems: 'center',
-                maxWidth: 500,
-                paddingY: 1,
-                paddingX: 0.5,
-                backgroundColor: 'rgba(0,0,0,0.3)',
-                borderRadius: 1,
-              }}
-            >
-              {pronosticoHoy.length > 0 ? (
-                pronosticoHoy.map(renderPronosticoHorario)
-              ) : (
-                <Typography variant="body2" sx={{ color: 'white', px: 2 }}>
-                  No hay pronóstico para hoy
-                </Typography>
-              )}
-            </Box>
 
             {/* Card de actividades favoritas para hoy */}
             <Card sx={{
@@ -404,9 +384,29 @@ function WeatherStart() {
               })()}
             </Card>
           </Stack>
-
+          {/* Cards pronóstico horario día actual */}
+          <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
+              Resumen
+            </Typography>
+          <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
+            {pronosticoHoy.length > 0 ? (
+              pronosticoHoy.map(renderPronosticoHorario)
+            ) : (
+              <Typography variant="body2" sx={{ color: 'white', px: 2 }}>
+                No hay pronóstico para hoy
+              </Typography>
+            )}
+          </Stack>
           {/*cards para los siguientes días*/}
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 2, mt: 1 }}>
+            <Typography
+              variant="h6"
+              component="h2"
+              gutterBottom
+              sx={{ mb: 2, color: 'white', textAlign: 'center' }}
+            >
+              Pronóstico de los siguientes días
+            </Typography>
             {pronosticoSiguientesDias.map((fecha) => {
               const temps = forecast[fecha];
               const minTemp = Math.min(...temps.map(item => item.main.temp_min));

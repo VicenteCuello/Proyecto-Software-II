@@ -73,7 +73,7 @@ function Main() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '270vh', // Alto suficiente para ver el contenido
+        height: '320vh', // Alto suficiente para ver el contenido
         alignItems: 'center',
         justifyContent: 'center',
       }}
