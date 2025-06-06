@@ -5,6 +5,7 @@ import { Button, Snackbar, Typography, List, ListItem, ListItemIcon, ListItemTex
 import { useNavigate, useParams } from 'react-router-dom';
 // Importa el icono de CheckCircle de Material UI para mostrar un símbolo de verificación
 import { CheckCircle } from '@mui/icons-material';
+import { availableActivities } from '../components/activities';
 
 // Componente ActivitySelection
 function ActivitySelection() {

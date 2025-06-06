@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'; //maejar variables, ejecutar código, memorizar funciones
 import { getWeatherByCity, getForecastByCity, getWeatherByCoords } from '../api/weather'; //llamadas a la API
+import { availableActivities } from '../components/activities';
 
 import {
   Box, //contenedor
@@ -262,18 +263,18 @@ function WeatherStart() {
             {/* temperatura y estado climático del día actual */}
             <Card sx={{width: '200px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', p: 2, color: 'white', }} elevation={4}>
               <Typography variant="h6" gutterBottom>
-                 {ciudad}
+                {ciudad}
               </Typography>
               <Box display="flex" alignItems="center" gap={0}>
                 <Typography variant="h3"> {temperature}<span style={{ verticalAlign: 'super', fontSize: '22px' }}>°C</span></Typography>
                 {icono && (
-                <Box
-                  component="img"
-                  src={`https://openweathermap.org/img/wn/${icono}@2x.png`}
-                  alt={weather}
-                  sx={{ width: 80, height: 80 }}
-                />
-               )}
+                  <Box
+                    component="img"
+                    src={`https://openweathermap.org/img/wn/${icono}@2x.png`}
+                    alt={weather}
+                    sx={{ width: 80, height: 80 }}
+                  />
+                )}
               </Box>
               <Typography variant="body1" sx={{ mb: 1,"&::first-letter": {textTransform: "uppercase"}}}>
                 {estadoClimatico}
@@ -290,6 +291,7 @@ function WeatherStart() {
               <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
               <Typography variant="body1">🌧️ Lluvia (última hora): {lluvia} mm</Typography>
             </Card>
+
             {/* Cards pronóstico horario día actual */}
             <Box
               sx={{
@@ -312,31 +314,204 @@ function WeatherStart() {
                 </Typography>
               )}
             </Box>
+
+            {/* Card de actividades favoritas para hoy */}
+            <Card sx={{
+              width: '220px',
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              backdropFilter: 'blur(5px)',
+              color: 'white',
+              p: 2,
+              display: 'flex',
+              flexDirection: 'column'
+            }} elevation={4}>
+              {/* Obtener actividades favoritas para hoy */}
+              {(() => {
+                const temps = pronosticoHoy;
+                const minTemp = temps.length > 0 ? Math.min(...temps.map(item => item.main.temp_min)) : 0;
+                const maxTemp = temps.length > 0 ? Math.max(...temps.map(item => item.main.temp_max)) : 0;
+                const estadosDelDia = temps.map(item => traducirMainClima(item.weather[0].main).toLowerCase());
+                
+                const activitiesData = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+                const favoritosGuardados = activitiesData.undefined || [];
+                const actividadesFavoritas = availableActivities.filter(act =>
+                  favoritosGuardados.includes(act.name)
+                );
+
+                const actividadesFiltradas = actividadesFavoritas.filter(act => {
+                  const tempOk = minTemp >= act.temperatura[0] && maxTemp <= act.temperatura[1];
+                  const climaOk = act.estado.some(e => estadosDelDia.includes(e.toLowerCase()));
+                  return tempOk && climaOk;
+                });
+
+                return (
+                  <>
+                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span>🌟</span> Actividades hoy
+                    </Typography>
+                    
+                    {actividadesFiltradas.length > 0 ? (
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gap: 1,
+                        overflowY: 'auto',
+                        maxHeight: '200px'
+                      }}>
+                        {actividadesFiltradas.map((act) => (
+                          <Box key={act.name} sx={{ 
+                            textAlign: 'center',
+                            p: 0.5
+                          }}>
+                            <Box
+                              component="img"
+                              src={act.image}
+                              alt={act.name}
+                              sx={{ 
+                                width: 40, 
+                                height: 40, 
+                                borderRadius: '8px',
+                                objectFit: 'cover',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                mb: 0.5
+                              }}
+                            />
+                            <Typography variant="caption" sx={{ 
+                              color: 'white',
+                              fontSize: '0.7rem',
+                              display: 'block',
+                              lineHeight: 1.1
+                            }}>
+                              {act.name}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontStyle: 'italic',
+                        textAlign: 'center',
+                        mt: 1
+                      }}>
+                        {pronosticoHoy.length > 0 
+                          ? 'No hay actividades compatibles' 
+                          : 'Esperando datos del clima...'}
+                      </Typography>
+                    )}
+                  </>
+                );
+              })()}
+            </Card>
           </Stack>
+
           {/*cards para los siguientes días*/}
           <Box sx={{ mb: 2 }}>
-            {pronosticoSiguientesDias.map((fecha) => (
-              <Box key={fecha} sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
-                  {(() => {
-                    const temps = forecast[fecha];
-                    const minTemp = Math.min(...temps.map(item => item.main.temp_min)).toFixed(1);
-                    const maxTemp = Math.max(...temps.map(item => item.main.temp_max)).toFixed(1);
-                    const fechaObj = new Date(fecha + 'T00:00:00');
-                    const fechaFormateada = fechaObj.toLocaleDateString('es-CL', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    });
-                    return `${fechaFormateada} (🌡️ Mín: ${minTemp}°C - Máx: ${maxTemp}°C)`;
-                  })()}
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
-                  {forecast[fecha].map(renderPronosticoHorario)}
-                </Stack>
-              </Box>
-            ))}
+            {pronosticoSiguientesDias.map((fecha) => {
+              const temps = forecast[fecha];
+              const minTemp = Math.min(...temps.map(item => item.main.temp_min));
+              const maxTemp = Math.max(...temps.map(item => item.main.temp_max));
+              const estadosDelDia = temps.map(item => traducirMainClima(item.weather[0].main).toLowerCase());
+              const fechaObj = new Date(fecha + 'T00:00:00');
+              const fechaFormateada = fechaObj.toLocaleDateString('es-CL', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+
+              // Obtener actividades favoritas
+              const activitiesData = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+              const favoritosGuardados = activitiesData.undefined || [];
+              const actividadesFavoritas = availableActivities.filter(act =>
+                favoritosGuardados.includes(act.name)
+              );
+
+              // Filtrar actividades compatibles con el clima del día
+              const actividadesFiltradas = actividadesFavoritas.filter(act => {
+                const tempOk = minTemp >= act.temperatura[0] && maxTemp <= act.temperatura[1];
+                const climaOk = act.estado.some(e => estadosDelDia.includes(e.toLowerCase()));
+                return tempOk && climaOk;
+              });
+
+              return (
+                <Box key={fecha} sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1, color: 'white' }}>
+                    {`${fechaFormateada} (🌡️ Mín: ${minTemp.toFixed(1)}°C - Máx: ${maxTemp.toFixed(1)}°C)`}
+                  </Typography>
+                  
+                  <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
+                    {temps.map(renderPronosticoHorario)}
+                  </Stack>
+
+                  {/* Sección de Actividades Favoritas */}
+                  <Box sx={{ 
+                    mt: 2,
+                    p: 1,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: 1
+                  }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      color: 'white', 
+                      mb: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                    }}>
+                      <span>🌟</span> Actividades recomendadas
+                    </Typography>
+                    
+                    {actividadesFiltradas.length > 0 ? (
+                      <Stack direction="row" spacing={2} sx={{ 
+                        flexWrap: 'wrap',
+                        gap: 1.5,
+                        justifyContent: 'left'
+                      }}>
+                        {actividadesFiltradas.map((act) => (
+                          <Box key={act.name} sx={{ 
+                            textAlign: 'center',
+                            width: 80,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center'
+                          }}>
+                            <Box
+                              component="img"
+                              src={act.image}
+                              alt={act.name}
+                              sx={{ 
+                                width: 50, 
+                                height: 50, 
+                                borderRadius: '8px',
+                                objectFit: 'cover',
+                                border: '2px solid rgba(255, 255, 255, 0.3)',
+                                mb: 0.5
+                              }}
+                            />
+                            <Typography variant="caption" sx={{ 
+                              color: 'white',
+                              fontSize: '0.75rem',
+                              lineHeight: 1.2,
+                              display: 'block'
+                            }}>
+                              {act.name}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                    ) : (
+                      <Typography variant="body2" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontStyle: 'italic',
+                        textAlign: 'center'
+                      }}>
+                        No hay actividades compatibles con el clima de este día
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              );
+            })}
           </Box>
         </>
       )}
