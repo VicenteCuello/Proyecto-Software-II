@@ -8,7 +8,6 @@ import {
   Button, //boton
   Typography, //texto con estilos
   Card, //tarjeta con bordes y sombra
-  CardContent, //interior de la tarjeta
   Stack, //organizar algo horizontal o verticalmente
 } from '@mui/material';
 
@@ -144,7 +143,8 @@ function WeatherStart() {
   
   // card para cada intervalo
   const renderPronosticoHorario = (item) => {
-    const clima = traducirMainClima(item.weather[0].main);
+    //const clima = traducirMainClima(item.weather[0].main);
+    const clima = item.weather[0].description;
     const temp = item.main.temp.toFixed(1);
     //const hora = item.dt_txt.split(' ')[1].slice(0, 5); 
     const hora = new Date(item.dt * 1000).toLocaleTimeString('es-CL', {
@@ -178,7 +178,7 @@ function WeatherStart() {
             sx={{ width: 40, height: 40 }}
         />
         <Box display="flex" flexDirection="column">
-          <Typography variant="caption" display="block" gutterBottom >
+          <Typography variant="caption" display="block" gutterBottom  sx={{"&::first-letter": {textTransform: "uppercase"}}}>
             {clima}
           </Typography>
           <Typography variant="caption">🌡️ {temp}°C</Typography>
