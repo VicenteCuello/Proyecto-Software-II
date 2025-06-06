@@ -386,7 +386,7 @@ function WeatherStart() {
           </Stack>
           {/* Cards pronóstico horario día actual */}
           <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
-              Resumen
+              Pronóstico del día
             </Typography>
           <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
             {pronosticoHoy.length > 0 ? (
