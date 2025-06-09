@@ -101,7 +101,7 @@ function WeatherStart() {
   };
   
   useEffect(() => {
-    obtenerClimaPorCiudad('Santiago');
+    obtenerClimaPorCiudad('Concepcion');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -123,11 +123,11 @@ function WeatherStart() {
             const datosAgrupados = agruparForecastPorDia(forecastData.list);
             setForecast(datosAgrupados);
           } catch (err) {
-            obtenerClimaPorCiudad('Santiago');
+            obtenerClimaPorCiudad('Concepcion');
           }
         },
         (err) => {
-          obtenerClimaPorCiudad('Santiago');
+          obtenerClimaPorCiudad('Concepcion');
         }
       );
     }
