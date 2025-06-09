@@ -397,7 +397,7 @@ function WeatherStart() {
               Pronóstico del día 
               {minTempHoy && maxTempHoy && (
                 <Box component="span" sx={{ fontSize: '1rem', ml: 1 }}>
-                  (🌡️ Min: {minTempHoy}°C / Max: {maxTempHoy}°C)
+                  (🌡️ Mín: {minTempHoy}°C / Máx: {maxTempHoy}°C)
                 </Box>
               )}
           </Typography>
