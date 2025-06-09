@@ -28,8 +28,8 @@ function WeatherStart() {
   const traducirMainClima = (main) => {
     const traducciones = {
       Thunderstorm: 'Tormenta',
-      Drizzle: 'Lluvia',
-      Rain: 'Lluvia',
+      Drizzle: 'Lluvioso',
+      Rain: 'Lluvioso',
       Snow: 'Nieve',
       Clear: 'Soleado',
       Clouds: 'Nublado',
@@ -106,6 +106,8 @@ function WeatherStart() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          console.log('Latitud:', latitude);
+          console.log('Longitud:', longitude);
           try {
             const data = await getWeatherByCoords(latitude, longitude);
             const climaTraducido = traducirMainClima(data.weather[0].main);
@@ -201,6 +203,12 @@ function WeatherStart() {
   const dia = String(hoy.getDate()).padStart(2, '0');
   const fechaHoy = `${año}-${mes}-${dia}`;
   const pronosticoHoy = forecast[fechaHoy] || [];
+  const minTempHoy = pronosticoHoy.length > 0
+  ? Math.min(...pronosticoHoy.map(item => item.main.temp_min)).toFixed(1)
+  : null;
+  const maxTempHoy = pronosticoHoy.length > 0
+    ? Math.max(...pronosticoHoy.map(item => item.main.temp_max)).toFixed(1)
+    : null;
   //pronostico siguientes días incluido el actual
   const diasPronostico = Object.keys(forecast)
     .sort((a, b) => new Date(a) - new Date(b))
@@ -386,8 +394,13 @@ function WeatherStart() {
           </Stack>
           {/* Cards pronóstico horario día actual */}
           <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
-              Pronóstico del día
-            </Typography>
+              Pronóstico del día 
+              {minTempHoy && maxTempHoy && (
+                <Box component="span" sx={{ fontSize: '1rem', ml: 1 }}>
+                  (🌡️ Min: {minTempHoy}°C / Max: {maxTempHoy}°C)
+                </Box>
+              )}
+          </Typography>
           <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
             {pronosticoHoy.length > 0 ? (
               pronosticoHoy.map(renderPronosticoHorario)
