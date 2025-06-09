@@ -28,8 +28,8 @@ function WeatherStart() {
   const traducirMainClima = (main) => {
     const traducciones = {
       Thunderstorm: 'Tormenta',
-      Drizzle: 'Lluvia',
-      Rain: 'Lluvia',
+      Drizzle: 'lluvioso',
+      Rain: 'lluvioso',
       Snow: 'Nieve',
       Clear: 'Soleado',
       Clouds: 'Nublado',
