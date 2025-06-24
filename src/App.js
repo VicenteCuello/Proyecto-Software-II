@@ -13,7 +13,7 @@ import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
 import ViewProfile from './components/ViewProfile';
-
+import ProfilePage from './components/ProfilePage';
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -127,6 +127,7 @@ function App() {
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/select-activities/favorites" element={<ActivitySelection />} />
           <Route path="/WeatherPage" element={<WeatherPage />} />
+          <Route path="/perfil" element={<ProfilePage user={userTest}/>} />
         </Routes>
       </Router>
     </ThemeProvider>

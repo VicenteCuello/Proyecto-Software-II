@@ -28,7 +28,7 @@ function UserBox({ user }) {
         {user.name.charAt(0).toUpperCase()}
       </Avatar>
       <Typography variant="body1">
-        Hola, {user.name.split(' ')[0]}
+        {user.name.split(' ')[0]}
       </Typography>
     </Paper>
   );
