@@ -12,6 +12,7 @@ import ManualWeather from './components/ManualWeather';
 import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
+import ViewProfile from './components/ViewProfile';
 
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
@@ -29,6 +30,7 @@ import { useState } from 'react';
 function Sidebar({ options }) {
   // Estado para manejar la apertura y cierre de la barra lateral
   const [drawerOpen, setDrawerOpen] = useState(false);
+
 
   // Función para cambiar el estado de la barra lateral (abrir o cerrar)
   const toggleDrawer = (open) => () => {
@@ -61,6 +63,12 @@ function Sidebar({ options }) {
   );
 }
 
+//datos para probar "ver usuario" y "perfil de usuario"
+const userTest = {
+  name: 'María José Castillo',
+  username: 'marcastillo',
+  email: 'marcastillo2021@udec.cl',
+};
 // Componente principal de la página de inicio
 function Main() {
   const options = [
@@ -111,6 +119,7 @@ function App() {
     <ThemeProvider theme={theme}>
       {/* Router para manejar las rutas de la aplicación */}
       <Router>
+        <ViewProfile user={userTest} />
         <Routes>
           {/* Rutas de la aplicación */}
           <Route path="/" element={<Main />} />
