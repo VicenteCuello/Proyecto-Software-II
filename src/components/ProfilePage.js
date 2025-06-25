@@ -1,8 +1,10 @@
-import { Box, Card, CardContent, Typography, Avatar } from '@mui/material';
+import { Box, Card, CardContent, Typography, Avatar, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function ProfilePage({ user }) {
+  const navigate = useNavigate();
   return (
-    <Box display="flex" justifyContent="center" mt={4}>
+    <Box display="flex" flexDirection="column" alignItems="center" mt={4} gap={3}>
       <Card sx={{ width: 400, padding: 2 }}>
         <CardContent>
           <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
@@ -15,6 +17,14 @@ function ProfilePage({ user }) {
           </Box>
         </CardContent>
       </Card>
+
+      <Button 
+        variant="contained" 
+        onClick={() => navigate('/')} 
+        sx={{ width: 200 }}  // ancho fijo para mejor apariencia
+      >
+        Volver al inicio
+      </Button>
     </Box>
   );
 }
