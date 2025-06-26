@@ -12,6 +12,7 @@ import ManualWeather from './components/ManualWeather';
 import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
+import Login from './components/Login';
 
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
@@ -118,6 +119,7 @@ function App() {
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/select-activities/favorites" element={<ActivitySelection />} />
           <Route path="/WeatherPage" element={<WeatherPage />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
     </ThemeProvider>
