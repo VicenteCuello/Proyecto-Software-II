@@ -2,6 +2,13 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Dependencias
+En la carpeta server, ejecutar el siguiente comando: npm install express cors pg bcrypt jsonwebtoken dotenv --save-dev nodemon
+Instalar en la carpeta raíz: npm install axios
+
+## Servidor
+Para ejecutar el servidor: npm run dev
+
 ## Available Scripts
 
 In the project directory, you can run:
