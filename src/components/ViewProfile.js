@@ -1,37 +1,75 @@
-import { Avatar, Box, Typography, Paper } from '@mui/material';
+import { Avatar, Box, Typography, Tooltip} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-function UserBox({ user }) {
+function ViewProfile({ user }) {
   const navigate = useNavigate();
 
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        position: 'fixed',
-        top: 16,
-        right: 16,
-        padding: '10px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-        borderRadius: 2,
-        cursor: 'pointer',
-        zIndex: 1200,
-        '&:hover': {
-          backgroundColor: 'grey.100',
+    <Tooltip 
+       title={
+        <Typography sx={{ fontSize: 13, fontWeight: 'bold', color: 'white' }}>
+          Ver perfil
+        </Typography>
+      }
+      arrow
+      slotProps={{
+        popper: {
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 4], //que tan abajo sale Tooltip
+              },
+            },
+          ],
+        },
+        tooltip: {
+          sx: {
+            bgcolor: 'black',
+            borderRadius: 2,
+            px: 1.5,
+            py: 0.5,
+          },
+        },
+        arrow: {
+          sx: {
+            color: 'black',
+          },
         },
       }}
-      onClick={() => navigate('/perfil')}
     >
-      <Avatar sx={{ bgcolor: 'primary.main' }}>
-        {user.name.charAt(0).toUpperCase()}
-      </Avatar>
-      <Typography variant="body1">
-        {user.name.split(' ')[0]}
-      </Typography>
-    </Paper>
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 16,
+          right: 16,
+          width: 48,          
+          height: 48,
+          //padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          //gap: 1.5,
+          cursor: 'pointer',
+          zIndex: 1200,
+          borderRadius: '50%',
+          '&:hover': {
+            backgroundColor: '#2e4053',
+            //borderRadius: 3, 
+          },
+        }}
+        onClick={() => navigate('/perfil')}
+      >
+        <Avatar sx={{ bgcolor: 'black' }}>
+          {user.name.charAt(0).toUpperCase()}
+        </Avatar>
+        {/*
+        <Typography variant="body1">
+          {user.name.split(' ')[0]}
+        </Typography> */}
+      </Box>
+    </Tooltip>
   );
 }
 
-export default UserBox;
+export default ViewProfile;

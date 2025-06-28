@@ -8,7 +8,7 @@ function ProfilePage({ user }) {
       <Card sx={{ width: 400, padding: 2 }}>
         <CardContent>
           <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-            <Avatar sx={{ width: 80, height: 80 }}>
+            <Avatar sx={{ width: 80, height: 80, bgcolor: 'black' }}>
               {user.name.charAt(0)}
             </Avatar>
             <Typography variant="h5">{user.name}</Typography>
