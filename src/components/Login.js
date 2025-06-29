@@ -1,6 +1,7 @@
 // src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import './Login.css'; // Importa el archivo CSS
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -39,36 +40,42 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2>Iniciar sesión</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Correo electrónico:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Contraseña:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Cargando...' : 'Iniciar sesión'}
-        </button>
-      </form>
+    <div className="login-wrapper"> {/* Nuevo contenedor para centrar */}
+      <div className="login-container">
+        <h2>Iniciar Sesión</h2>
+        {error && <p className="error-message">{error}</p>}
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="email">Correo electrónico</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="tu@ejemplo.com"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="********"
+            />
+          </div>
+          <button type="submit" className="submit-button" disabled={loading}>
+            {loading ? 'Cargando...' : 'Entrar'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
