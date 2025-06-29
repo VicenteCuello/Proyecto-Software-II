@@ -12,8 +12,8 @@ import ManualWeather from './components/ManualWeather';
 import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
-import ViewProfile from './components/ViewProfile';
-import ProfilePage from './components/ProfilePage';
+import Login from './components/Login';
+
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -81,7 +81,7 @@ function Main() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '320vh', // Alto suficiente para ver el contenido
+        height: '340vh', // Alto suficiente para ver el contenido
         alignItems: 'center',
         justifyContent: 'center',
       }}
@@ -127,7 +127,7 @@ function App() {
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/select-activities/favorites" element={<ActivitySelection />} />
           <Route path="/WeatherPage" element={<WeatherPage />} />
-          <Route path="/perfil" element={<ProfilePage user={userTest}/>} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
     </ThemeProvider>
