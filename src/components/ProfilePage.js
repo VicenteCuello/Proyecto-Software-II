@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, Avatar, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 
 function ProfilePage({ user }) {
   const navigate = useNavigate();

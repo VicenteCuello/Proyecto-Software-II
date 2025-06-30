@@ -13,8 +13,9 @@ import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
 import Login from './components/Login';
-import ViewProfile from './components/ViewProfile';
-import ProfilePage from './components/ProfilePage';
+import ViewProfile2 from './components/ViewProfile2';
+//import ProfilePage from './components/ProfilePage';
+import ProfilePrueba from './components/ProfilePrueba';
 
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
@@ -121,7 +122,7 @@ function App() {
     <ThemeProvider theme={theme}>
       {/* Router para manejar las rutas de la aplicación */}
       <Router>
-        <ViewProfile user={userTest} />
+        <ViewProfile2/>
         <Routes>
           {/* Rutas de la aplicación */}
           <Route path="/" element={<Main />} />
@@ -129,7 +130,7 @@ function App() {
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/select-activities/favorites" element={<ActivitySelection />} />
           <Route path="/WeatherPage" element={<WeatherPage />} />
-          <Route path="/perfil" element={<ProfilePage user={userTest} />} />
+          <Route path="/perfil" element={<ProfilePrueba user={userTest} />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </Router>

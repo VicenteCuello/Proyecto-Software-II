@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Avatar, Box, Typography, Tooltip} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function ViewProfile({ user }) {
   const navigate = useNavigate();
