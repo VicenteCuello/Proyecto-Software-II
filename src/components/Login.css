@@ -1,7 +1,6 @@
 /* src/components/Login.css */
 
 /* General body styling for background and basic font */
-/* Eliminamos las propiedades de layout de aquí */
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -9,7 +8,7 @@ body {
   color: #333;
 }
 
-/* Wrapper para centrar el contenido - AQUÍ ES DONDE APLICAMOS LAS PROPIEDADES DE LAYOUT */
+/* Wrapper para centrar el contenido */
 .login-wrapper {
   display: flex; /* Centra el contenido horizontalmente */
   justify-content: center; /* Centra el contenido horizontalmente */

@@ -1,14 +1,15 @@
 // src/components/CalendarComponent.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Calendar from 'react-calendar';
 import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
 import './CalendarStyles.css';
-import { getForecastByCity } from '../api/weather'; // Asegúrate de que la ruta a tu API sea correcta
-import { availableActivities } from './activities'; // Asegúrate de que la ruta sea correcta
+import { getForecastByCity } from '../api/weather'; 
+import { availableActivities } from './activities'; 
+import { CityContext } from './CityContext';
 
-// Función para agrupar el pronóstico por día. Puedes moverla a un archivo de utilidades si la usas en otros lugares.
+// Función para agrupar el pronóstico por día. 
 const agruparForecastPorDia = (lista) => {
   const listaPorDia = lista.reduce((acc, item) => {
     const fechaLocal = new Date(item.dt * 1000);
@@ -16,6 +17,7 @@ const agruparForecastPorDia = (lista) => {
     const mes = String(fechaLocal.getMonth() + 1).padStart(2, '0');
     const dia = String(fechaLocal.getDate()).padStart(2, '0');
     const fechaClaveLocal = `${año}-${mes}-${dia}`;
+    
 
     if (!acc[fechaClaveLocal]) acc[fechaClaveLocal] = [];
     acc[fechaClaveLocal].push({ ...item, horaLocal: fechaLocal });
@@ -55,8 +57,8 @@ function CalendarComponent() {
   const [date, setDate] = useState(new Date());
   const [activitiesByDate, setActivitiesByDate] = useState({});
   const [forecast, setForecast] = useState({});
-  // Se usa una ciudad por defecto. Podrías hacer esto más dinámico si lo necesitas.
-  const [city] = useState('Concepcion');
+  // LEER LA CIUDAD DESDE EL CONTEXTO GLOBAL
+  const { city } = useContext(CityContext); 
   const navigate = useNavigate();
 
   // Cargar actividades guardadas y el pronóstico del tiempo al iniciar
@@ -65,12 +67,14 @@ function CalendarComponent() {
     setActivitiesByDate(savedActivities);
 
     const fetchWeather = async () => {
+      if (!city) return; // No hacer nada si no hay ciudad
       try {
         const forecastData = await getForecastByCity(city);
         const groupedForecast = agruparForecastPorDia(forecastData.list);
         setForecast(groupedForecast);
       } catch (error) {
-        console.error("No se pudo obtener el pronóstico del tiempo.", error);
+        console.error(`No se pudo obtener el pronóstico para ${city}.`, error);
+        setForecast({}); // Limpiar el pronóstico si falla
       }
     };
 
