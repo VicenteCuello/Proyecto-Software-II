@@ -1,38 +1,142 @@
-// Importa los módulos necesarios de React y React Router
+// src/components/CalendarComponent.js
+
 import React, { useState, useEffect } from 'react';
-import Calendar from 'react-calendar'; // Componente para mostrar el calendario
-import { useNavigate } from 'react-router-dom'; // Hook para la navegación entre páginas
-import 'react-calendar/dist/Calendar.css'; // Estilos predeterminados de react-calendar
-import './CalendarStyles.css'; // Estilos personalizados para el calendario
+import Calendar from 'react-calendar';
+import { useNavigate } from 'react-router-dom';
+import 'react-calendar/dist/Calendar.css';
+import './CalendarStyles.css';
+import { getForecastByCity } from '../api/weather'; // Asegúrate de que la ruta a tu API sea correcta
+import { availableActivities } from './activities'; // Asegúrate de que la ruta sea correcta
 
-// Componente principal que representa el calendario
+// Función para agrupar el pronóstico por día. Puedes moverla a un archivo de utilidades si la usas en otros lugares.
+const agruparForecastPorDia = (lista) => {
+  const listaPorDia = lista.reduce((acc, item) => {
+    const fechaLocal = new Date(item.dt * 1000);
+    const año = fechaLocal.getFullYear();
+    const mes = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+    const dia = String(fechaLocal.getDate()).padStart(2, '0');
+    const fechaClaveLocal = `${año}-${mes}-${dia}`;
+
+    if (!acc[fechaClaveLocal]) acc[fechaClaveLocal] = [];
+    acc[fechaClaveLocal].push({ ...item, horaLocal: fechaLocal });
+    return acc;
+  }, {});
+
+  Object.keys(listaPorDia).forEach((fecha) => {
+    listaPorDia[fecha].sort((a, b) => a.horaLocal - b.horaLocal);
+  });
+
+  return listaPorDia;
+};
+
+// Función para traducir el estado del clima principal.
+const traducirMainClima = (main) => {
+  const traducciones = {
+    Thunderstorm: 'tormenta',
+    Drizzle: 'lluvioso',
+    Rain: 'lluvioso',
+    Snow: 'nieve',
+    Clear: 'soleado',
+    Clouds: 'nublado',
+    Mist: 'niebla',
+    Smoke: 'niebla',
+    Haze: 'niebla',
+    Dust: 'niebla',
+    Fog: 'niebla',
+    Sand: 'niebla',
+    Ash: 'niebla',
+    Squall: 'viento',
+    Tornado: 'tormenta',
+  };
+  return traducciones[main] || main.toLowerCase();
+};
+
 function CalendarComponent() {
-  // Estado para manejar la fecha seleccionada y las actividades asociadas a esa fecha
   const [date, setDate] = useState(new Date());
-  const [activitiesByDate, setActivitiesByDate] = useState({}); // Guardamos las actividades por fecha
-  const navigate = useNavigate(); // Hook para navegación
+  const [activitiesByDate, setActivitiesByDate] = useState({});
+  const [forecast, setForecast] = useState({});
+  // Se usa una ciudad por defecto. Podrías hacer esto más dinámico si lo necesitas.
+  const [city] = useState('Concepcion');
+  const navigate = useNavigate();
 
-  // useEffect para cargar las actividades guardadas desde localStorage cuando el componente se monta
+  // Cargar actividades guardadas y el pronóstico del tiempo al iniciar
   useEffect(() => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {}; // Si no hay datos, usamos un objeto vacío
-    setActivitiesByDate(savedActivities); // Actualiza el estado con las actividades guardadas
-  }, []);
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    setActivitiesByDate(savedActivities);
 
-  // Función para manejar el cambio de fecha en el calendario
+    const fetchWeather = async () => {
+      try {
+        const forecastData = await getForecastByCity(city);
+        const groupedForecast = agruparForecastPorDia(forecastData.list);
+        setForecast(groupedForecast);
+      } catch (error) {
+        console.error("No se pudo obtener el pronóstico del tiempo.", error);
+      }
+    };
+
+    fetchWeather();
+  }, [city]); // El efecto se ejecuta si la ciudad cambia
+
   const handleDateChange = (newDate) => {
-    setDate(newDate); // Actualiza la fecha seleccionada
-    const formattedDate = newDate.toISOString().split('T')[0]; // Convierte la fecha al formato YYYY-MM-DD
-    navigate(`/select-activities/${formattedDate}`); // Navega a la ruta correspondiente
+    setDate(newDate);
+    const formattedDate = newDate.toISOString().split('T')[0];
+    navigate(`/select-activities/${formattedDate}`);
   };
 
-  // Función para mostrar un indicador si un día tiene actividades programadas
+  // Lógica para asignar clases CSS a cada día del calendario
+  const tileClassName = ({ date, view }) => {
+    if (view !== 'month') {
+      return null;
+    }
+
+    const formattedDate = date.toISOString().split('T')[0];
+    const activitiesForDay = activitiesByDate[formattedDate];
+
+    // Si no hay actividades para este día, no se aplica ninguna clase.
+    if (!activitiesForDay || activitiesForDay.length === 0) {
+      return null;
+    }
+
+    const forecastForDay = forecast[formattedDate];
+
+    // Gris: Hay actividades pero no hay pronóstico disponible para ese día.
+    if (!forecastForDay) {
+      return 'day-gray';
+    }
+
+    const dailyTemps = forecastForDay.map(item => item.main.temp);
+    const minTemp = Math.min(...dailyTemps);
+    const maxTemp = Math.max(...dailyTemps);
+    // Obtener todos los estados del clima únicos para el día.
+    const weatherStates = [...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main).toLowerCase()))];
+
+    let allActivitiesPossible = true;
+
+    for (const activityName of activitiesForDay) {
+      const activity = availableActivities.find(a => a.name === activityName);
+
+      if (activity) {
+        const tempOk = minTemp >= activity.temperatura[0] && maxTemp <= activity.temperatura[1];
+        const weatherOk = activity.estado.some(e => weatherStates.includes(e));
+
+        // Si una sola actividad no es compatible, el día se marca en rojo.
+        if (!tempOk || !weatherOk) {
+          allActivitiesPossible = false;
+          break;
+        }
+      }
+    }
+
+    // Verde si todas son posibles, Rojo si al menos una no lo es.
+    return allActivitiesPossible ? 'day-green' : 'day-red';
+  };
+  
+  // Muestra un indicador si hay actividades (punto debajo de la fecha)
   const tileContent = ({ date, view }) => {
-    if (view !== 'month') return null; // Solo mostrar contenido en la vista de mes
-    const formattedDate = date.toISOString().split('T')[0]; // Formatea la fecha a YYYY-MM-DD
-    const hasActivities = activitiesByDate[formattedDate] && activitiesByDate[formattedDate].length > 0; // Verifica si hay actividades en esa fecha
-    return hasActivities ? (
-      <div className="activity-indicator" /> // Muestra un indicador si hay actividades
-    ) : null;
+    if (view !== 'month') return null;
+    const formattedDate = date.toISOString().split('T')[0];
+    const hasActivities = activitiesByDate[formattedDate] && activitiesByDate[formattedDate].length > 0;
+    return hasActivities ? <div className="activity-indicator" /> : null;
   };
 
   return (
@@ -41,21 +145,22 @@ function CalendarComponent() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center', // Centra el calendario verticalmente
-        height: '100vh', 
-        backgroundColor: '#07498d', // Color de fondo
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#07498d',
       }}
     >
       <h1 className="titulo-calendario">Selecciona una fecha para agendar</h1>
       <div style={{ zIndex: 10 }}>
         <Calendar
-          onChange={handleDateChange} // Asocia la función handleDateChange al cambiar la fecha
-          value={date} // Establece la fecha seleccionada
-          tileContent={tileContent} // Añade el contenido a cada celda del calendario
+          onChange={handleDateChange}
+          value={date}
+          tileContent={tileContent}
+          tileClassName={tileClassName} // Aquí se aplica la lógica de coloreado
         />
       </div>
     </div>
   );
 }
 
-export default CalendarComponent; // Exporta el componente CalendarComponent
+export default CalendarComponent;
