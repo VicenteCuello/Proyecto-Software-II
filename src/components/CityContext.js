@@ -1,4 +1,6 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
+import { getForecastByCity } from '../api/weather';
+import { availableActivities } from './activities';
 
 // 1. Crear el contexto con un valor inicial
 export const CityContext = createContext({
