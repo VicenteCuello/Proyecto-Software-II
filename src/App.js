@@ -13,9 +13,8 @@ import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
 import Login from './components/Login';
-import ViewProfile2 from './components/ViewProfile2';
-//import ProfilePage from './components/ProfilePage';
-import ProfilePrueba from './components/ProfilePrueba';
+import ViewProfile from './components/ViewProfile';
+import ProfilePage from './components/ProfilePage';
 
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
@@ -66,12 +65,6 @@ function Sidebar({ options }) {
   );
 }
 
-//datos para probar "ver usuario" y "perfil de usuario"
-const userTest = {
-  name: 'María José Castillo',
-  username: 'marcastillo',
-  email: 'marcastillo2021@udec.cl',
-};
 // Componente principal de la página de inicio
 function Main() {
   const options = [
@@ -122,7 +115,7 @@ function App() {
     <ThemeProvider theme={theme}>
       {/* Router para manejar las rutas de la aplicación */}
       <Router>
-        <ViewProfile2/>
+        <ViewProfile/>
         <Routes>
           {/* Rutas de la aplicación */}
           <Route path="/" element={<Main />} />
@@ -130,7 +123,7 @@ function App() {
           <Route path="/select-activities/:date" element={<ActivitySelection />} />
           <Route path="/select-activities/favorites" element={<ActivitySelection />} />
           <Route path="/WeatherPage" element={<WeatherPage />} />
-          <Route path="/perfil" element={<ProfilePrueba user={userTest} />} />
+          <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </Router>

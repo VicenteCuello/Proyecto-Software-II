@@ -1,14 +1,35 @@
 import { useEffect, useState } from 'react';
-import { Avatar, Box, Typography, Tooltip} from '@mui/material';
+import { Avatar, Box, Typography, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function ViewProfile({ user }) {
+function ViewProfile() {
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(res.data.profile);
+      } catch (error) {
+        console.error('Error al obtener perfil:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (!user) return null;
 
   return (
     <Tooltip 
-       title={
+      title={
         <Typography sx={{ fontSize: 13, fontWeight: 'bold', color: 'white' }}>
           Ver perfil
         </Typography>
@@ -16,28 +37,12 @@ function ViewProfile({ user }) {
       arrow
       slotProps={{
         popper: {
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [0, 4], //que tan abajo sale Tooltip
-              },
-            },
-          ],
+          modifiers: [{ name: 'offset', options: { offset: [0, 4] } }],
         },
         tooltip: {
-          sx: {
-            bgcolor: 'black',
-            borderRadius: 2,
-            px: 1.5,
-            py: 0.5,
-          },
+          sx: { bgcolor: 'black', borderRadius: 2, px: 1.5, py: 0.5 },
         },
-        arrow: {
-          sx: {
-            color: 'black',
-          },
-        },
+        arrow: { sx: { color: 'black' } },
       }}
     >
       <Box
@@ -45,30 +50,21 @@ function ViewProfile({ user }) {
           position: 'fixed',
           top: 16,
           right: 16,
-          width: 48,          
+          width: 48,
           height: 48,
-          //padding: '10px 16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          //gap: 1.5,
           cursor: 'pointer',
           zIndex: 1200,
           borderRadius: '50%',
-          '&:hover': {
-            backgroundColor: '#2e4053',
-            //borderRadius: 3, 
-          },
+          '&:hover': { backgroundColor: '#2e4053' },
         }}
         onClick={() => navigate('/perfil')}
       >
         <Avatar sx={{ bgcolor: 'black' }}>
-          {user.name.charAt(0).toUpperCase()}
+          {user.email.charAt(0).toUpperCase()}
         </Avatar>
-        {/*
-        <Typography variant="body1">
-          {user.name.split(' ')[0]}
-        </Typography> */}
       </Box>
     </Tooltip>
   );
