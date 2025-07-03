@@ -1,171 +1,437 @@
-// Importa los componentes necesarios de Material UI para crear la interfaz
-import React, { useState } from 'react';
-import { Button, Snackbar, Typography, List, ListItem, ListItemIcon, ListItemText, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
-// Importa los hooks de React Router para la navegación y manejo de parámetros de URL
+import React, { useState, useEffect } from 'react';
+import { 
+  Button, 
+  Snackbar, 
+  Typography, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  Dialog, 
+  DialogActions, 
+  DialogContent, 
+  DialogTitle, 
+  Box, 
+  TextField,
+  CircularProgress,
+  IconButton 
+} from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-// Importa el icono de CheckCircle de Material UI para mostrar un símbolo de verificación
-import { CheckCircle } from '@mui/icons-material';
+import { CheckCircle, Search, MyLocation } from '@mui/icons-material';
+import { getWeatherByCity, getForecastByCity, getWeatherByCoords } from '../api/weather'; //llamadas a la API
 import { availableActivities } from '../components/activities';
 
-// Componente ActivitySelection
+const groupForecastByDay = (list) => {
+  return list.reduce((acc, item) => {
+    const date = new Date(item.dt * 1000).toISOString().split('T')[0];
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(item);
+    return acc;
+  }, {});
+};
+
+const translateWeatherMain = (main) => {
+  const translations = {
+    Thunderstorm: 'tormenta',
+    Drizzle: 'lluvioso',
+    Rain: 'lluvioso',
+    Snow: 'nieve',
+    Clear: 'soleado',
+    Clouds: 'nublado',
+    Mist: 'niebla',
+    Smoke: 'niebla',
+    Haze: 'niebla',
+    Dust: 'niebla',
+    Fog: 'niebla',
+    Sand: 'niebla',
+    Ash: 'niebla',
+    Squall: 'viento',
+    Tornado: 'tormenta',
+  };
+  return translations[main] || main.toLowerCase();
+};
+
 function ActivitySelection() {
-  // Obtiene el parámetro 'date' desde la URL
   const { date } = useParams();
-  // Hook de navegación para redirigir a otras rutas
   const navigate = useNavigate();
-
-  // Estado para gestionar las actividades seleccionadas
-  const [activities, setActivities] = useState(() => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    // Si estamos en la página de 'favoritos', cargamos las actividades favoritas
-    if (date === 'favorites') {
-      return savedActivities.favorites || [];
-    }
-    // Si no, cargamos las actividades para la fecha específica
-    return savedActivities[date] || [];
-  });
-
-  // Estados para manejar la visibilidad de los componentes de Snackbar y Dialog
+  
+  // Estados del componente
+  const [cityInput, setCityInput] = useState('');
+  const [currentCity, setCurrentCity] = useState('Concepción');
+  const [forecast, setForecast] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedActivities, setSelectedActivities] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // Actividades disponibles con sus detalles (nombre, imagen, rango de temperatura y estados del clima)
-  const availableActivities = [
-    { name: 'Yoga', image: '/images/yoga.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
-    { name: 'Correr', image: '/images/correr.webp', temperatura: [5, 25], estado: ['soleado', 'nublado', 'viento', 'niebla'] },
-    { name: 'Leer', image: '/images/leer.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
-    { name: 'Estudiar React', image: '/images/estudiar react.webp', temperatura: [18, 24], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
-    { name: 'Ir al cine', image: '/images/ir al cine.webp', temperatura: [18, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
-    { name: 'Ir al gym', image: '/images/ir al gym.webp', temperatura: [16, 22], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
-    { name: 'Ir de compras', image: '/images/Ir de compras.webp', temperatura: [15, 23], estado: ['soleado', 'nublado', 'lluvioso', 'viento', 'niebla'] },
-    { name: 'Cocinar', image: '/images/cocinar.webp', temperatura: [18, 23], estado: ['soleado', 'nublado', 'lluvioso', 'tormenta', 'viento', 'niebla'] },
-  ];
+  // Cargar actividades guardadas
+  useEffect(() => {
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    setSelectedActivities(savedActivities[date] || []);
+  }, [date]);
 
-  // Función para alternar la selección de actividades (añadir o eliminar de la lista)
-  const toggleActivity = (activity) => {
-    setActivities((prev) =>
-      prev.includes(activity)
-        ? prev.filter((a) => a !== activity)
-        : [...prev, activity]
+  // Buscar ciudad inicial al cargar
+  useEffect(() => {
+    fetchWeather(currentCity);
+  }, []);
+
+  const fetchWeather = async (city) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getForecastByCity(city);
+      setForecast(groupForecastByDay(data.list));
+      setCurrentCity(city);
+    } catch (err) {
+      console.error("Error al obtener pronóstico:", err);
+      setError(`No se pudo obtener el clima para ${city}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchWeatherByCoords = async () => {
+    try {
+      setGeoLoading(true);
+      setError(null);
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      
+      // Cambiado a getWeatherByCoords que es la función disponible en tu API
+      const data = await getWeatherByCoords(
+        position.coords.latitude, 
+        position.coords.longitude
+      );
+      
+      // Asegúrate que la respuesta de getWeatherByCoords tenga la misma estructura que getForecastByCity
+      // Si es necesario, puedes adaptar esta parte según la estructura real de tu API
+      setForecast(groupForecastByDay(data.list));
+      setCurrentCity(data.city.name);
+      setCityInput(data.city.name);
+    } catch (err) {
+      console.error("Error en geolocalización:", err);
+      setError("No se pudo obtener tu ubicación");
+    } finally {
+      setGeoLoading(false);
+    }
+  };
+
+  const getWeatherByCoords = async () => {
+    try {
+      setGeoLoading(true);
+      setError(null);
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      
+      const data = await getWeatherByCoords(
+        position.coords.latitude, 
+        position.coords.longitude
+      );
+      
+      setForecast(groupForecastByDay(data.list));
+      setCurrentCity(data.city.name);
+      setCityInput(data.city.name);
+    } catch (err) {
+      console.error("Error en geolocalización:", err);
+      setError("No se pudo obtener tu ubicación");
+    } finally {
+      setGeoLoading(false);
+    }
+  };
+
+  const checkActivityViability = (activity) => {
+    if (!forecast || !forecast[date]) return 'gray';
+    
+    const dayForecast = forecast[date];
+    const temps = dayForecast.map(item => item.main.temp);
+    const minTemp = Math.min(...temps);
+    const maxTemp = Math.max(...temps);
+    
+    const weatherConditions = [...new Set(
+      dayForecast.map(item => translateWeatherMain(item.weather[0].main))
+    )];
+
+    const isTempOK = minTemp >= activity.temperatura[0] && maxTemp <= activity.temperatura[1];
+    const isWeatherOK = activity.estado.some(condition => 
+      weatherConditions.includes(condition)
+    );
+
+    return isTempOK && isWeatherOK ? 'green' : 'red';
+  };
+
+  const toggleActivity = (activityName) => {
+    setSelectedActivities(prev => 
+      prev.includes(activityName)
+        ? prev.filter(name => name !== activityName)
+        : [...prev, activityName]
     );
   };
 
-  // Función para guardar las actividades seleccionadas en el localStorage
   const handleSave = () => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    // Guarda las actividades en la fecha correspondiente o en favoritos
-    if (date === 'favorites') {
-      savedActivities.favorites = activities;
-    } else {
-      savedActivities[date] = activities;
-    }
-    // Actualiza el localStorage con las actividades guardadas
-    localStorage.setItem('activitiesByDate', JSON.stringify(savedActivities));
-    console.log(`Actividades registradas para ${date}:`, activities);
-    // Muestra un mensaje de éxito y redirige a la página principal
+    const saved = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    saved[date] = selectedActivities;
+    localStorage.setItem('activitiesByDate', JSON.stringify(saved));
     setOpenSnackbar(true);
-    setTimeout(() => {
-      setOpenSnackbar(false);
-      navigate('/'); // Redirige al inicio después de guardar
-    }, 1000);
+    setTimeout(() => navigate('/calendar'), 1000);
   };
 
-  // Función para cerrar el diálogo de confirmación
-  const handleDialogClose = (shouldNavigate) => {
-    setOpenDialog(false);
-    if (shouldNavigate) {
-      navigate('/'); // Redirige al inicio si el usuario cancela
+  const handleSearch = () => {
+    if (cityInput.trim()) {
+      fetchWeather(cityInput.trim());
     }
   };
 
-  // Función para abrir el diálogo de confirmación de cancelación
-  const handleCancel = () => {
-    setOpenDialog(true);
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
+
+  const getActivityStyle = (activity) => {
+    const status = checkActivityViability(activity);
+    const isSelected = selectedActivities.includes(activity.name);
+
+    const baseStyles = {
+      padding: '10px 20px',
+      marginBottom: '8px',
+      borderRadius: '8px',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+      }
+    };
+
+    const statusStyles = {
+      green: {
+        backgroundColor: isSelected ? '#4d774d' : '#6fa96f',
+        '&:hover': { backgroundColor: '#5e8c5e' }
+      },
+      red: {
+        backgroundColor: isSelected ? '#a84a4a' : '#cc7070',
+        '&:hover': { backgroundColor: '#bb5d5d' }
+      },
+      gray: {
+        backgroundColor: isSelected ? '#686868' : '#979797',
+        '&:hover': { backgroundColor: '#7f7f7f' }
+      }
+
+    };
+
+    return { ...baseStyles, ...statusStyles[status] };
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        backgroundColor: '#5767d0'
+      }}>
+        <CircularProgress sx={{ color: 'white' }} />
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ padding: '30px', backgroundColor: '#5767d0', minHeight: '100vh' }}>
-      {/* Título de la página con un estilo personalizado */}
-      <Typography variant="h4" align="center" gutterBottom sx={{ color: '#eeeff9', fontSize: '32px', fontWeight: 'bold' }}>
-        Seleccionar actividades para {date === 'favorites' ? 'Favoritas' : date}
-      </Typography>
-
-      <Box sx={{ width: '80%', maxWidth: 500, margin: '0 auto' }}>
-        {/* Lista de actividades disponibles */}
-        <List>
-          {availableActivities.map((activity) => (
-            <ListItem
-              key={activity.name}
-              button
-              onClick={() => toggleActivity(activity.name)}
-              sx={{
-                padding: '10px 20px',
-                marginBottom: '2px',
-                backgroundColor: activities.includes(activity.name) ? '#7532b0' : 'transparent',
-                borderRadius: '4px',
-                '&:hover': { backgroundColor: '#821add' },
-              }}
-            >
-              <ListItemIcon>
-                {/* Muestra la imagen de la actividad */}
-                <img
-                  src={activity.image}
-                  alt={activity.name}
-                  style={{ width: 45, height: 45, objectFit: 'contain' }}
-                />
-              </ListItemIcon>
-              {/* Nombre de la actividad */}
-              <ListItemText primary={<Typography sx={{ color: '#eeeff9', fontSize: '20px', fontWeight: 'bold' }}>{activity.name}</Typography>} />
-              {/* Muestra un icono de verificación si la actividad está seleccionada */}
-              {activities.includes(activity.name) && <CheckCircle color="primary" />}
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-
-      {/* Botones para guardar o cancelar cambios */}
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+    <Box sx={{ 
+      padding: 3, 
+      backgroundColor: '#5767d0',
+      minHeight: '100vh'
+    }}>
+      {/* Buscador de ciudad */}
+      <Box sx={{ 
+        maxWidth: 600,
+        margin: '0 auto 30px',
+        display: 'flex',
+        gap: 2,
+        alignItems: 'center'
+      }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          size="small"
+          value={cityInput}
+          onChange={(e) => setCityInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Buscar ciudad..."
+          sx={{
+            input: { color: 'white' },
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+              '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.7)' }
+            }
+          }}
+          InputProps={{
+            startAdornment: (
+              <Search sx={{ color: 'rgba(255,255,255,0.7)', mr: 1 }} />
+            ),
+          }}
+        />
+        
         <Button
           variant="contained"
-          onClick={handleSave}
+          onClick={handleSearch}
+          disabled={!cityInput.trim()}
           sx={{
-            backgroundColor: '#232b60',
-            color: '#fff',
+            minWidth: 100,
+            bgcolor: 'rgba(255,255,255,0.1)',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
           }}
         >
-          Guardar y volver
+          Buscar
         </Button>
-        <Button
-          variant="contained"
-          color='error'
-          onClick={handleCancel}
-          style={{ marginLeft: '20px' }}
+        
+        <IconButton
+          onClick={fetchWeatherByCoords}
+          disabled={geoLoading}
+          sx={{
+            color: 'white',
+            bgcolor: 'rgba(255,255,255,0.1)',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+          }}
         >
-          Cancelar cambios
-        </Button>
-      </div>
+          {geoLoading ? <CircularProgress size={24} /> : <MyLocation />}
+        </IconButton>
+      </Box>
 
-      {/* Snackbar que muestra un mensaje de éxito al guardar las actividades */}
+      {error && (
+        <Box sx={{
+          backgroundColor: 'rgba(198, 40, 40, 0.2)',
+          color: '#ffcdd2',
+          padding: 2,
+          borderRadius: 1,
+          margin: '0 auto 20px',
+          maxWidth: 600,
+          textAlign: 'center'
+        }}>
+          {error}
+        </Box>
+      )}
+
+      <Typography variant="h4" align="center" sx={{ 
+        color: 'white', 
+        mb: 3,
+        fontWeight: 'bold'
+      }}>
+        Actividades para {date} en {currentCity}
+      </Typography>
+
+      <Box sx={{ 
+        maxWidth: 600, 
+        mx: 'auto',
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 4,
+        p: 3,
+        boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
+      }}>
+        <List>
+          {availableActivities.map((activity) => {
+            const viability = checkActivityViability(activity);
+            const isSelected = selectedActivities.includes(activity.name);
+
+            return (
+              <ListItem
+                key={activity.name}
+                button
+                onClick={() => toggleActivity(activity.name)}
+                sx={getActivityStyle(activity)}
+              >
+                <ListItemIcon>
+                  <img 
+                    src={activity.image} 
+                    alt={activity.name}
+                    style={{ 
+                      width: 50, 
+                      height: 50,
+                      borderRadius: '50%',
+                      border: `2px solid ${isSelected ? 'white' : 'transparent'}`,
+                      objectFit: 'cover'
+                    }}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography sx={{ 
+                      color: 'white',
+                      fontWeight: 'medium',
+                      fontSize: '1.1rem',
+                      textDecoration: viability === 'red' ? 'line-through' : 'none'
+                    }}>
+                      {activity.name}
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography sx={{ color: 'rgba(245,245,245,0.7)' }}>
+                    </Typography>
+                  }
+                />
+                {isSelected && <CheckCircle sx={{ color: '#f0f0f0' }} />}
+              </ListItem>
+            );
+          })}
+        </List>
+
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          gap: 2, 
+          mt: 4 
+        }}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            sx={{
+              backgroundColor: '#232b60',
+              color: 'white',
+              px: 4,
+              py: 1.5,
+              '&:hover': {
+                backgroundColor: '#1a203d'
+              }
+            }}
+          >
+            Guardar y volver
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => setOpenDialog(true)}
+            sx={{
+              px: 4,
+              py: 1.5
+            }}
+          >
+            Cancelar
+          </Button>
+        </Box>
+      </Box>
+
       <Snackbar
         open={openSnackbar}
-        message="Actividades guardadas con éxito"
         autoHideDuration={2000}
+        message="Actividades guardadas correctamente"
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       />
 
-      {/* Diálogo de confirmación para cancelar cambios */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>¡Advertencia!</DialogTitle>
+        <DialogTitle>Confirmar acción</DialogTitle>
         <DialogContent>
-          <Typography variant="body1">
-            ¿Seguro que deseas cancelar?
-          </Typography>
+          <Typography>¿Estás seguro que deseas cancelar? Los cambios no se guardarán.</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleDialogClose(false)} color="primary">
-            No, continuar
-          </Button>
-          <Button onClick={() => handleDialogClose(true)} color="primary">
-            Sí, cancelar
+          <Button onClick={() => setOpenDialog(false)}>Continuar editando</Button>
+          <Button 
+            onClick={() => navigate('/calendar')} 
+            color="error"
+          >
+            Salir sin guardar
           </Button>
         </DialogActions>
       </Dialog>
@@ -173,4 +439,4 @@ function ActivitySelection() {
   );
 }
 
-export default ActivitySelection; // Exporta el componente para que se pueda usar en otras partes de la aplicación
+export default ActivitySelection;

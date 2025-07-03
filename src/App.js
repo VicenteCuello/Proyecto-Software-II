@@ -15,6 +15,7 @@ import WeatherStart from './components/WeatherStart';
 import Login from './components/Login';
 import Register from './components/Register';
 import RequireAuth from './components/RequireAuth';
+import { CityProvider } from './components/CityContext';
 
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
@@ -125,6 +126,7 @@ function App() {
     // Proveedor de tema de Material UI
     <ThemeProvider theme={theme}>
       {/* Router para manejar las rutas de la aplicación */}
+      <CityProvider>
       <Router>
         <Routes>
           {/* Rutas de la aplicación */}
@@ -143,6 +145,7 @@ function App() {
 +         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      </CityProvider>
     </ThemeProvider>
   );
 }
