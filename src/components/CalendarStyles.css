@@ -96,3 +96,17 @@ html, body {
   display: inline-block;
   margin-top: 2px; /* Pequeño ajuste para evitar solapamiento */
 }
+.day-green {
+    background-color: rgba(76, 175, 80, 0.7) !important;
+    border-radius: 5px;
+}
+
+.day-red {
+    background-color: rgba(244, 67, 54, 0.7) !important;
+    border-radius: 5px;
+}
+
+.day-gray {
+    background-color: rgba(158, 158, 158, 0.7) !important;
+    border-radius: 5px;
+}

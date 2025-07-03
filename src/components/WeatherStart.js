@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'; //maejar variables, ejecutar código, memorizar funciones
+import React, { useState, useEffect, useCallback, useContext } from 'react'; //maejar variables, ejecutar código, memorizar funciones
 import { getWeatherByCity, getForecastByCity, getWeatherByCoords } from '../api/weather'; //llamadas a la API
 import { availableActivities } from '../components/activities';
+import { CityContext } from './CityContext';
 
 import {
   Box, //contenedor
@@ -25,6 +26,7 @@ function WeatherStart() {
   const [viento, setWind] = useState('');
   const [lluvia, setLluvia] = useState(0);
   const [icono, setIcono] = useState('');
+  const { setCity: setGlobalCity } = useContext(CityContext);
   const traducirMainClima = (main) => {
     const traducciones = {
       Thunderstorm: 'Tormenta',
@@ -59,6 +61,8 @@ function WeatherStart() {
       setClouds(data.clouds.all);
       setWind(data.wind.speed);
       setLluvia(data.rain && data.rain['1h'] ? data.rain['1h'] : 0);
+      //  ACTUALIZAR EL CONTEXTO GLOBAL
+      setGlobalCity(data.name);
       //icono que proporciona la API
       setIcono(data.weather[0].icon); 
       setSubmitted(true);
@@ -69,10 +73,8 @@ function WeatherStart() {
       setForecast(datosAgrupados);
     } catch (error) {
       alert('No se pudo obtener el clima para esa ciudad.');
-      //setSubmitted(false);
-      //setForecast({});
     }
-  }, []);
+  }, [setGlobalCity]);
 
   // agrupar datos-intervalos por día
   const agruparForecastPorDia = (lista) => {
@@ -118,6 +120,7 @@ function WeatherStart() {
             setHumidity(data.main.humidity);
             setClouds(data.clouds.all);
             setWind(data.wind.speed);
+            setGlobalCity(data.name);
             setIcono(data.weather[0].icon);
             setSubmitted(true);
 
@@ -132,8 +135,10 @@ function WeatherStart() {
           obtenerClimaPorCiudad('Concepcion');
         }
       );
+    } else {
+        obtenerClimaPorCiudad('Concepcion');
     }
-  }, [obtenerClimaPorCiudad]);
+  }, [obtenerClimaPorCiudad, setGlobalCity]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

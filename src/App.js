@@ -1,5 +1,5 @@
 // Importa los componentes necesarios de react-router-dom para la navegación
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate} from 'react-router-dom';
 
 // Importa el proveedor de tema de Material UI y el tema personalizado
 import { ThemeProvider } from '@mui/material/styles';
@@ -15,6 +15,9 @@ import WeatherStart from './components/WeatherStart';
 import Login from './components/Login';
 import ViewProfile from './components/ViewProfile';
 import ProfilePage from './components/ProfilePage';
+import Register from './components/Register';
+import RequireAuth from './components/RequireAuth';
+import { CityProvider } from './components/CityContext';
 
 // Importa los componentes de Material UI para la barra lateral
 import IconButton from '@mui/material/IconButton';
@@ -32,11 +35,18 @@ import { useState } from 'react';
 function Sidebar({ options }) {
   // Estado para manejar la apertura y cierre de la barra lateral
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const navigate = useNavigate();
 
 
   // Función para cambiar el estado de la barra lateral (abrir o cerrar)
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    setDrawerOpen(false);
+    navigate('/', { replace: true });
   };
 
   return (
@@ -59,6 +69,11 @@ function Sidebar({ options }) {
               </ListItemButton>
             </ListItem>
           ))}
+          <ListItem key="logout" disablePadding>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemText primary="Cerrar sesión" />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
     </>
@@ -114,19 +129,27 @@ function App() {
     // Proveedor de tema de Material UI
     <ThemeProvider theme={theme}>
       {/* Router para manejar las rutas de la aplicación */}
+      <CityProvider>
       <Router>
         <ViewProfile/>
         <Routes>
           {/* Rutas de la aplicación */}
-          <Route path="/" element={<Main />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/select-activities/:date" element={<ActivitySelection />} />
-          <Route path="/select-activities/favorites" element={<ActivitySelection />} />
-          <Route path="/WeatherPage" element={<WeatherPage />} />
-          <Route path="/perfil" element={<ProfilePage />} />
-          <Route path="/login" element={<Login />} />
+          {/* públicas */}
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* protegidas */}
+          <Route path="/home" element={<RequireAuth><Main /></RequireAuth>} />
+          <Route path="/calendar" element={<RequireAuth><CalendarPage /></RequireAuth>} />
+          <Route path="/select-activities/:date" element={<RequireAuth><ActivitySelection /></RequireAuth>} />
+          <Route path="/select-activities/favorites" element={<RequireAuth><ActivitySelection /></RequireAuth>} />
+          <Route path="/WeatherPage" element={<RequireAuth><WeatherPage /></RequireAuth>} />
+
+          {/* Si entran a cualquier otra ruta, van al login */}
++         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      </CityProvider>
     </ThemeProvider>
   );
 }
