@@ -1,8 +1,20 @@
 // src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem('authToken')) {
+      navigate('/home', { replace: true });
+    }
+  }, [navigate]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -30,7 +42,7 @@ const Login = () => {
 
       alert('Inicio de sesión exitoso');
       // Redirigir a otra página
-      window.location.href = '/'; // O el path que prefieras
+      window.location.href = '/home';
     } catch (err) {
       setError('Correo o contraseña incorrectos');
     } finally {
@@ -69,6 +81,9 @@ const Login = () => {
           {loading ? 'Cargando...' : 'Iniciar sesión'}
         </button>
       </form>
+      <p>
+        ¿No tienes una cuenta? <Link to="/register">Regístrate</Link>
+      </p>
     </div>
   );
 };
