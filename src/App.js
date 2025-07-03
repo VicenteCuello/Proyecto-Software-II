@@ -1,5 +1,5 @@
 // Importa los componentes necesarios de react-router-dom para la navegación
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate, useLocation} from 'react-router-dom';
 
 // Importa el proveedor de tema de Material UI y el tema personalizado
 import { ThemeProvider } from '@mui/material/styles';
@@ -123,6 +123,18 @@ function CalendarPage() {
   );
 }
 
+//mostrar informacion del perfil solo si no se está en login y registro
+function ConditionalProfile() {
+  const location = useLocation();
+  const hiddenPaths = ['/', '/register']; // pestañas en donde no se muestra
+
+  if (hiddenPaths.includes(location.pathname)) {
+    return null;
+  }
+
+  return <ViewProfile />;
+}
+
 // Componente principal de la aplicación que maneja las rutas
 function App() {
   return (
@@ -131,7 +143,7 @@ function App() {
       {/* Router para manejar las rutas de la aplicación */}
       <CityProvider>
       <Router>
-        <ViewProfile/>
+        <ConditionalProfile /> 
         <Routes>
           {/* Rutas de la aplicación */}
           {/* públicas */}
@@ -144,6 +156,7 @@ function App() {
           <Route path="/select-activities/:date" element={<RequireAuth><ActivitySelection /></RequireAuth>} />
           <Route path="/select-activities/favorites" element={<RequireAuth><ActivitySelection /></RequireAuth>} />
           <Route path="/WeatherPage" element={<RequireAuth><WeatherPage /></RequireAuth>} />
+          <Route path="/Perfil" element={<RequireAuth><ProfilePage /></RequireAuth>} />
 
           {/* Si entran a cualquier otra ruta, van al login */}
 +         <Route path="*" element={<Navigate to="/" replace />} />

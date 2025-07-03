@@ -58,7 +58,7 @@ function ViewProfile() {
           cursor: 'pointer',
           zIndex: 1200,
           borderRadius: '50%',
-          '&:hover': { backgroundColor: '#2e4053' },
+          '&:hover': { backgroundColor: '#ffffff' },
         }}
         onClick={() => navigate('/perfil')}
       >
