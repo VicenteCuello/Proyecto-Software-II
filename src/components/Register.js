@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import './Register.css'; 
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -27,7 +28,7 @@ const Register = () => {
       alert('Registro exitoso. Ya puedes iniciar sesión.');
       window.location.href = '/login';
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error de servidor.';
+      const msg = err.response?.data?.error || 'Error de servidor. Inténtalo de nuevo.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -35,39 +36,43 @@ const Register = () => {
   };
 
   return (
-    <div className="register-container">
-      <h2>Registrarse</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Correo electrónico:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Contraseña:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Cargando...' : 'Registrarse'}
-        </button>
-      </form>
-      <p>
-        ¿Ya tienes una cuenta? <Link to="/login">Inicia sesión</Link>
-      </p>
+    <div className="register-wrapper">
+      <div className="register-container">
+        <h2 className="register-title">Crear una cuenta</h2>
+        {error && <p className="error-message">{error}</p>}
+        <form onSubmit={handleSubmit} className="register-form">
+          <div className="form-group">
+            <label htmlFor="email">Correo electrónico</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={handleChange}
+              required
+              aria-label="Correo electrónico"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={handleChange}
+              required
+              aria-label="Contraseña"
+            />
+          </div>
+          <button type="submit" className="submit-button" disabled={loading}>
+            {loading ? 'Registrando...' : 'Registrarse'}
+          </button>
+        </form>
+        <p className="login-prompt">
+          ¿Ya tienes una cuenta? <Link to="/login" className="login-link">Inicia sesión aquí</Link>
+        </p>
+      </div>
     </div>
   );
 };

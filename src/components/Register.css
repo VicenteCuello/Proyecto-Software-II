@@ -1,0 +1,133 @@
+/* Estilos generales del cuerpo (sin altura mínima forzada aquí) */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #07498d;
+}
+
+.register-wrapper {
+  display: flex; /* Habilita flexbox para centrar el contenido */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  min-height: 100vh; 
+  width: 100%;
+}
+
+/* Contenedor del formulario de registro */
+.register-container {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave pero pronunciada */
+  width: 100%;
+  max-width: 400px; /* Ancho máximo para el formulario */
+  text-align: center;
+  box-sizing: border-box; /* Incluir padding en el ancho */
+}
+
+.register-title {
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2.2em; /* Tamaño de fuente más grande */
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Mensaje de error */
+.error-message {
+  color: #e74c3c; /* Rojo más vibrante */
+  background-color: #fde8e8;
+  border: 1px solid #e74c3c;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9em;
+  animation: fadeIn 0.5s ease-out; /* Animación de aparición */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Formulario */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio entre grupos de formulario */
+}
+
+.form-group {
+  text-align: left; /* Alinea etiquetas a la izquierda */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 600;
+  font-size: 1em;
+}
+
+.form-group input[type="email"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1.1em;
+  color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transiciones suaves */
+  box-sizing: border-box;
+}
+
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus {
+  border-color: #007bff; /* Borde azul al enfocar */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); /* Sombra suave al enfocar */
+  outline: none; /* Elimina el contorno por defecto del navegador */
+}
+
+/* Botón de envío */
+.submit-button {
+  background-color: #007bff; /* Azul vibrante */
+  color: white;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.15em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Transiciones */
+  margin-top: 10px;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+  transform: translateY(-2px); /* Pequeño levantamiento */
+}
+
+.submit-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Enlace de inicio de sesión */
+.login-prompt {
+  margin-top: 25px;
+  color: #666;
+  font-size: 0.95em;
+}
+
+.login-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.login-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}

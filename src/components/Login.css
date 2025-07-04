@@ -1,6 +1,4 @@
-/* src/components/Login.css */
 
-/* General body styling for background and basic font */
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -8,19 +6,16 @@ body {
   color: #333;
 }
 
-/* Wrapper para centrar el contenido */
+
 .login-wrapper {
   display: flex; /* Centra el contenido horizontalmente */
   justify-content: center; /* Centra el contenido horizontalmente */
   align-items: center; /* Centra el contenido verticalmente */
   width: 100%; /* Ocupa todo el ancho */
   min-height: 100vh; /* Ocupa al menos el 100% de la altura de la ventana visible */
-  /* Asegura que el wrapper sea el que maneje el espacio y el centrado */
+
 }
 
-/* Resto de tu CSS para .login-container, h2, .error-message, etc., se mantiene igual */
-
-/* Contenedor principal del formulario de login */
 .login-container {
   background-color: #ffffff;
   padding: 40px;
