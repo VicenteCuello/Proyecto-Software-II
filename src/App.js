@@ -8,6 +8,7 @@ import theme from './theme';
 // Importa los componentes para las diferentes páginas de la app
 import CalendarComponent from './components/CalendarComponent';
 import ActivitySelection from './components/ActivitySelection';
+import FavoriteActivities from './components/FavoriteActivities';
 import ManualWeather from './components/ManualWeather';
 import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
@@ -154,7 +155,7 @@ function App() {
           <Route path="/home" element={<RequireAuth><Main /></RequireAuth>} />
           <Route path="/calendar" element={<RequireAuth><CalendarPage /></RequireAuth>} />
           <Route path="/select-activities/:date" element={<RequireAuth><ActivitySelection /></RequireAuth>} />
-          <Route path="/select-activities/favorites" element={<RequireAuth><ActivitySelection /></RequireAuth>} />
+          <Route path="/select-activities/favorites" element={<RequireAuth><FavoriteActivities /></RequireAuth>} />
           <Route path="/WeatherPage" element={<RequireAuth><WeatherPage /></RequireAuth>} />
           <Route path="/Perfil" element={<RequireAuth><ProfilePage /></RequireAuth>} />
 
