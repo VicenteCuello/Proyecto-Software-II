@@ -13,6 +13,7 @@ import ManualWeather from './components/ManualWeather';
 import NotificationsPage from './components/Notification';
 import WeatherPage from './components/WeatherPage';
 import WeatherStart from './components/WeatherStart';
+import WeatherStart2 from './components/WeatherStart2';
 import Login from './components/Login';
 import ViewProfile from './components/ViewProfile';
 import ProfilePage from './components/ProfilePage';
@@ -150,6 +151,7 @@ function App() {
           {/* públicas */}
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/prueba" element={<WeatherStart2 />} />
 
           {/* protegidas */}
           <Route path="/home" element={<RequireAuth><Main /></RequireAuth>} />

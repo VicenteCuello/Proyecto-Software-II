@@ -48,8 +48,8 @@ function ViewProfile() {
       <Box
         sx={{
           position: 'fixed',
-          top: 16,
-          right: 16,
+          top: 8,
+          right: 8,
           width: 48,
           height: 48,
           display: 'flex',
