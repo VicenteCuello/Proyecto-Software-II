@@ -1,37 +1,22 @@
-// src/components/CalendarComponent.js
-
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
 import './CalendarStyles.css';
-import { getForecastByCity } from '../api/weather'; 
-import { availableActivities } from './activities'; 
-import { CityContext } from './CityContext';
+import { getForecastByCity } from '../api/weather';
+import { availableActivities } from './activities';
 
-// Función para agrupar el pronóstico por día. 
+// Agrupa forecast por día (YYYY-MM-DD)
 const agruparForecastPorDia = (lista) => {
-  const listaPorDia = lista.reduce((acc, item) => {
-    const fechaLocal = new Date(item.dt * 1000);
-    const año = fechaLocal.getFullYear();
-    const mes = String(fechaLocal.getMonth() + 1).padStart(2, '0');
-    const dia = String(fechaLocal.getDate()).padStart(2, '0');
-    const fechaClaveLocal = `${año}-${mes}-${dia}`;
-    
-
-    if (!acc[fechaClaveLocal]) acc[fechaClaveLocal] = [];
-    acc[fechaClaveLocal].push({ ...item, horaLocal: fechaLocal });
+  return lista.reduce((acc, item) => {
+    const fecha = new Date(item.dt * 1000).toISOString().split('T')[0];
+    if (!acc[fecha]) acc[fecha] = [];
+    acc[fecha].push(item);
     return acc;
   }, {});
-
-  Object.keys(listaPorDia).forEach((fecha) => {
-    listaPorDia[fecha].sort((a, b) => a.horaLocal - b.horaLocal);
-  });
-
-  return listaPorDia;
 };
 
-// Función para traducir el estado del clima principal.
+// Traducción del clima
 const traducirMainClima = (main) => {
   const traducciones = {
     Thunderstorm: 'tormenta',
@@ -56,30 +41,36 @@ const traducirMainClima = (main) => {
 function CalendarComponent() {
   const [date, setDate] = useState(new Date());
   const [activitiesByDate, setActivitiesByDate] = useState({});
-  const [forecast, setForecast] = useState({});
-  // LEER LA CIUDAD DESDE EL CONTEXTO GLOBAL
-  const { city } = useContext(CityContext); 
+  const [forecasts, setForecasts] = useState({});
   const navigate = useNavigate();
 
-  // Cargar actividades guardadas y el pronóstico del tiempo al iniciar
   useEffect(() => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+    const savedActivities = JSON.parse(localStorage.getItem('activitiesData')) || {};
     setActivitiesByDate(savedActivities);
 
-    const fetchWeather = async () => {
-      if (!city) return; // No hacer nada si no hay ciudad
-      try {
-        const forecastData = await getForecastByCity(city);
-        const groupedForecast = agruparForecastPorDia(forecastData.list);
-        setForecast(groupedForecast);
-      } catch (error) {
-        console.error(`No se pudo obtener el pronóstico para ${city}.`, error);
-        setForecast({}); // Limpiar el pronóstico si falla
-      }
+    const fetchForecasts = async () => {
+      const forecastCache = {};
+
+      const fetchPromises = Object.entries(savedActivities).map(async ([fecha, data]) => {
+        const location = data.location;
+        if (!location) return;
+
+        try {
+          const forecastData = await getForecastByCity(location);
+          const grouped = agruparForecastPorDia(forecastData.list);
+          forecastCache[fecha] = grouped[fecha] || [];
+        } catch (error) {
+          console.error(`No se pudo obtener el pronóstico para ${location} en ${fecha}.`, error);
+          forecastCache[fecha] = [];
+        }
+      });
+
+      await Promise.all(fetchPromises);
+      setForecasts(forecastCache);
     };
 
-    fetchWeather();
-  }, [city]); // El efecto se ejecuta si la ciudad cambia
+    fetchForecasts();
+  }, []);
 
   const handleDateChange = (newDate) => {
     setDate(newDate);
@@ -87,59 +78,50 @@ function CalendarComponent() {
     navigate(`/select-activities/${formattedDate}`);
   };
 
-  // Lógica para asignar clases CSS a cada día del calendario
   const tileClassName = ({ date, view }) => {
-    if (view !== 'month') {
-      return null;
-    }
+    if (view !== 'month') return null;
 
     const formattedDate = date.toISOString().split('T')[0];
-    const activitiesForDay = activitiesByDate[formattedDate];
+    const dayData = activitiesByDate[formattedDate];
 
-    // Si no hay actividades para este día, no se aplica ninguna clase.
-    if (!activitiesForDay || activitiesForDay.length === 0) {
-      return null;
+    if (!dayData || !dayData.activities || dayData.activities.length === 0) {
+      return null; // sin actividades
     }
 
-    const forecastForDay = forecast[formattedDate];
+    const forecastForDay = forecasts[formattedDate];
 
-    // Gris: Hay actividades pero no hay pronóstico disponible para ese día.
-    if (!forecastForDay) {
-      return 'day-gray';
+    if (!forecastForDay || forecastForDay.length === 0) {
+      return 'day-gray'; // sin pronóstico disponible
     }
 
-    const dailyTemps = forecastForDay.map(item => item.main.temp);
-    const minTemp = Math.min(...dailyTemps);
-    const maxTemp = Math.max(...dailyTemps);
-    // Obtener todos los estados del clima únicos para el día.
-    const weatherStates = [...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main).toLowerCase()))];
+    const temps = forecastForDay.map(item => item.main.temp);
+    const minTemp = Math.min(...temps);
+    const maxTemp = Math.max(...temps);
+    const weatherStates = [
+      ...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main)))
+    ];
 
-    let allActivitiesPossible = true;
+    let allPossible = true;
 
-    for (const activityName of activitiesForDay) {
+    for (const activityName of dayData.activities) {
       const activity = availableActivities.find(a => a.name === activityName);
-
       if (activity) {
         const tempOk = minTemp >= activity.temperatura[0] && maxTemp <= activity.temperatura[1];
         const weatherOk = activity.estado.some(e => weatherStates.includes(e));
-
-        // Si una sola actividad no es compatible, el día se marca en rojo.
         if (!tempOk || !weatherOk) {
-          allActivitiesPossible = false;
+          allPossible = false;
           break;
         }
       }
     }
 
-    // Verde si todas son posibles, Rojo si al menos una no lo es.
-    return allActivitiesPossible ? 'day-green' : 'day-red';
+    return allPossible ? 'day-green' : 'day-red';
   };
-  
-  // Muestra un indicador si hay actividades (punto debajo de la fecha)
+
   const tileContent = ({ date, view }) => {
     if (view !== 'month') return null;
     const formattedDate = date.toISOString().split('T')[0];
-    const hasActivities = activitiesByDate[formattedDate] && activitiesByDate[formattedDate].length > 0;
+    const hasActivities = activitiesByDate[formattedDate]?.activities?.length > 0;
     return hasActivities ? <div className="activity-indicator" /> : null;
   };
 
@@ -160,7 +142,7 @@ function CalendarComponent() {
           onChange={handleDateChange}
           value={date}
           tileContent={tileContent}
-          tileClassName={tileClassName} // Aquí se aplica la lógica de coloreado
+          tileClassName={tileClassName}
         />
       </div>
     </div>

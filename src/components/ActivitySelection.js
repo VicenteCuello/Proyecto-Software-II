@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, Search, MyLocation } from '@mui/icons-material';
-import { getWeatherByCity, getForecastByCity, getWeatherByCoords } from '../api/weather'; //llamadas a la API
+import { getWeatherByCity, getForecastByCity, getWeatherByCoords } from '../api/weather';
 import { availableActivities } from '../components/activities';
 
 const groupForecastByDay = (list) => {
@@ -66,16 +66,22 @@ function ActivitySelection() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // Cargar actividades guardadas
+  // Cargar actividades y ubicación guardadas
   useEffect(() => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    setSelectedActivities(savedActivities[date] || []);
+    const savedData = JSON.parse(localStorage.getItem('activitiesData')) || {};
+    const dateData = savedData[date] || {};
+    
+    setSelectedActivities(dateData.activities || []);
+    
+    // Si hay ciudad guardada para esta fecha, cargarla
+    if (dateData.location) {
+      setCurrentCity(dateData.location);
+      setCityInput(dateData.location);
+      fetchWeather(dateData.location);
+    } else {
+      fetchWeather(currentCity);
+    }
   }, [date]);
-
-  // Buscar ciudad inicial al cargar
-  useEffect(() => {
-    fetchWeather(currentCity);
-  }, []);
 
   const fetchWeather = async (city) => {
     try {
@@ -91,34 +97,8 @@ function ActivitySelection() {
       setLoading(false);
     }
   };
-  const fetchWeatherByCoords = async () => {
-    try {
-      setGeoLoading(true);
-      setError(null);
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
-      
-      // Cambiado a getWeatherByCoords que es la función disponible en tu API
-      const data = await getWeatherByCoords(
-        position.coords.latitude, 
-        position.coords.longitude
-      );
-      
-      // Asegúrate que la respuesta de getWeatherByCoords tenga la misma estructura que getForecastByCity
-      // Si es necesario, puedes adaptar esta parte según la estructura real de tu API
-      setForecast(groupForecastByDay(data.list));
-      setCurrentCity(data.city.name);
-      setCityInput(data.city.name);
-    } catch (err) {
-      console.error("Error en geolocalización:", err);
-      setError("No se pudo obtener tu ubicación");
-    } finally {
-      setGeoLoading(false);
-    }
-  };
 
-  const getWeatherByCoords = async () => {
+  const fetchWeatherByCoords = async () => {
     try {
       setGeoLoading(true);
       setError(null);
@@ -171,10 +151,22 @@ function ActivitySelection() {
   };
 
   const handleSave = () => {
-    const saved = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    saved[date] = selectedActivities;
-    localStorage.setItem('activitiesByDate', JSON.stringify(saved));
+    // Leer el objeto completo actual del localStorage
+    const savedData = JSON.parse(localStorage.getItem('activitiesData')) || {};
+
+    // Insertar o actualizar la fecha actual con las actividades seleccionadas y la ciudad actual
+    savedData[date] = {
+      activities: selectedActivities,
+      location: currentCity
+    };
+
+    // Guardar de vuelta en localStorage de forma persistente
+    localStorage.setItem('activitiesData', JSON.stringify(savedData));
+
+    // Mostrar confirmación visual
     setOpenSnackbar(true);
+
+    // Volver al calendario tras 1 segundo
     setTimeout(() => navigate('/calendar'), 1000);
   };
 
@@ -218,7 +210,6 @@ function ActivitySelection() {
         backgroundColor: isSelected ? '#686868' : '#979797',
         '&:hover': { backgroundColor: '#7f7f7f' }
       }
-
     };
 
     return { ...baseStyles, ...statusStyles[status] };
@@ -368,6 +359,7 @@ function ActivitySelection() {
                   }
                   secondary={
                     <Typography sx={{ color: 'rgba(245,245,245,0.7)' }}>
+                      {activity.temperatura[0]}°C - {activity.temperatura[1]}°C | {activity.estado.join(', ')}
                     </Typography>
                   }
                 />
@@ -415,7 +407,7 @@ function ActivitySelection() {
       <Snackbar
         open={openSnackbar}
         autoHideDuration={2000}
-        message="Actividades guardadas correctamente"
+        message={`Actividades y ubicación guardadas para ${date}`}
         onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       />
