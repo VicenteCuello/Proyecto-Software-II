@@ -219,65 +219,134 @@ function WeatherStart2() {
 
   //mostrar clima  
   return (
+  <>
+    {/* ACTIVIDADES RECOMENDADAS - Izquierda */}
     <Box
       sx={{
-        position: 'absolute',   // o 'fixed' si no quieres que se mueva al hacer scroll
-        top: '60px',            // distancia desde el borde superior
-        right: '55px',          // distancia desde el borde derecho
+        position: 'absolute',
+        top: '60px',
+        left: '40px',
+        width: '230px',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 2,
+        p: 2,
+        height: 'fit-content',
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="subtitle1" sx={{ color: 'white', mb: 1 }}>
+        🌟 Actividades recomendadas
+      </Typography>
+      {(() => {
+        const temps = datosDiaActual;
+        const minTemp = temps.length > 0 ? Math.min(...temps.map(item => item.main.temp_min)) : 0;
+        const maxTemp = temps.length > 0 ? Math.max(...temps.map(item => item.main.temp_max)) : 0;
+        const estadosDelDia = temps.map(item => traducirMainClima(item.weather[0].main).toLowerCase());
+
+        const activitiesData = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
+        const favoritosGuardados = activitiesData.undefined || [];
+        const actividadesFavoritas = availableActivities.filter(act =>
+          favoritosGuardados.includes(act.name)
+        );
+
+        const actividadesFiltradas = actividadesFavoritas.filter(act => {
+          const tempOk = minTemp >= act.temperatura[0] && maxTemp <= act.temperatura[1];
+          const climaOk = act.estado.some(e => estadosDelDia.includes(e.toLowerCase()));
+          return tempOk && climaOk;
+        });
+
+        return actividadesFiltradas.length > 0 ? (
+          <Stack direction="column" spacing={1}>
+            {actividadesFiltradas.map((act) => (
+              <Box key={act.name} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box
+                  component="img"
+                  src={act.image}
+                  alt={act.name}
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '8px',
+                    objectFit: 'cover',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                  }}
+                />
+                <Typography variant="caption" sx={{ color: 'white', fontSize: '0.75rem' }}>
+                  {act.name}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontStyle: 'italic' }}>
+            No hay actividades compatibles
+          </Typography>
+        );
+      })()}
+    </Box>
+
+    {/* CLIMA Y PRONÓSTICO - Derecha */}
+    <Box
+      sx={{
+        position: 'absolute',
+        top: '60px',
+        right: '55px',
         width: '90vw',
         maxWidth: 700,
-        //backgroundImage: 'url(/images/clima.jpg)',
-        //backgroundSize: 'cover',
-        //backgroundPosition: 'center',
-        //backgroundRepeat: 'no-repeat',
-        bgcolor: 'rgba(0,0,0,0.5)',
+        //bgcolor: '#5767d0',
+        bgcolor: 'rgba(7, 13, 54, 0.68)',
         padding: 2,
         borderRadius: 2,
         fontFamily: "'Roboto', sans-serif",
         boxShadow: 3,
       }}
     >
+      {/* 🔎 Buscador */}
       <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
         Buscar una ciudad
       </Typography>
 
-    <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
+      <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
         <TextField
-            label="Ingresa la ciudad"
-            variant="outlined"
-            size="small"
-            fullWidth
-            value={inputCity}
-            onChange={(e) => setInputCity(e.target.value)}
-            placeholder="Ej: Madrid"
-            sx={{
-                input: { color: 'white' },
-                '& label': { color: 'white' },
-            }}
-            InputProps={{
-                endAdornment: (
-                    <Button type="submit" sx={{ minWidth: 0, padding: '6px', color: 'white' }}>
-                        <SearchIcon />
-                    </Button>
-                ),
-            }}
+          label="Ingresa la ciudad"
+          variant="outlined"
+          size="small"
+          fullWidth
+          value={inputCity}
+          onChange={(e) => setInputCity(e.target.value)}
+          placeholder="Ej: Madrid"
+          sx={{
+            input: { color: 'white' },
+            '& label': { color: 'white' },
+          }}
+          InputProps={{
+            endAdornment: (
+              <Button type="submit" sx={{ minWidth: 0, padding: '6px', color: 'white' }}>
+                <SearchIcon />
+              </Button>
+            ),
+          }}
         />
-    </form>
+      </form>
 
-      <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
-        Tiempo de hoy
-      </Typography>
-      {/*mostrar card con el clima actual */}
+      {/* 🌤️ Info del clima actual */}
       {submitted && (
         <>
+          <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
+            Tiempo de hoy
+          </Typography>
+
           <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-            {/* temperatura y estado climático del día actual */}
-            <Card sx={{width: '200px', height: '130px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', p: 2, color: 'white', }} elevation={4}>
+            {/* Card temperatura y ciudad */}
+            <Card sx={{ width: '200px', height: '130px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', p: 2, color: 'white' }} elevation={4}>
               <Typography variant="h6" gutterBottom>
                 {ciudad}
               </Typography>
               <Box display="flex" alignItems="center" gap={0}>
-                <Typography variant="h3"> {temperature}<span style={{ verticalAlign: 'super', fontSize: '22px' }}>°C</span></Typography>
+                <Typography variant="h3">
+                  {temperature}
+                  <span style={{ verticalAlign: 'super', fontSize: '22px' }}>°C</span>
+                </Typography>
                 {icono && (
                   <Box
                     component="img"
@@ -287,286 +356,102 @@ function WeatherStart2() {
                   />
                 )}
               </Box>
-              <Typography variant="body1" sx={{ mb: 1,"&::first-letter": {textTransform: "uppercase"}}}>
+              <Typography variant="body1" sx={{ mb: 1, "&::first-letter": { textTransform: "uppercase" } }}>
                 {estadoClimatico}
               </Typography>
             </Card>
 
-            {/* datos del clima actual */}
-            <Card sx={{width: '250px', height: '130px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', padding: '16px', color: 'white' }} elevation={4}>
+            {/* Card detalles */}
+            <Card sx={{ width: '250px', height: '130px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', padding: '16px', color: 'white' }} elevation={4}>
               <Typography variant="h6" gutterBottom>
                 Detalles del clima
               </Typography>
               <Typography variant="body1">💧 Humedad: {humedad}%</Typography>
               <Typography variant="body1">☁️ Nubosidad: {nubosidad}%</Typography>
               <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
-              {/*<Typography variant="body1">🌧️ Lluvia (última hora): {lluvia} mm</Typography>*/}
             </Card>
-
-            {/* Card de actividades favoritas para hoy
-            <Card sx={{
-              width: '220px',
-              height:'150px',
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              backdropFilter: 'blur(5px)',
-              color: 'white',
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column'
-            }} elevation={4}>  */}
-              {/* Obtener actividades favoritas para hoy 
-              {(() => {
-                const temps = pronosticoHoy;
-                const minTemp = temps.length > 0 ? Math.min(...temps.map(item => item.main.temp_min)) : 0;
-                const maxTemp = temps.length > 0 ? Math.max(...temps.map(item => item.main.temp_max)) : 0;
-                const estadosDelDia = temps.map(item => traducirMainClima(item.weather[0].main).toLowerCase());
-                
-                const activitiesData = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-                const favoritosGuardados = activitiesData.undefined || [];
-                const actividadesFavoritas = availableActivities.filter(act =>
-                  favoritosGuardados.includes(act.name)
-                );
-
-                const actividadesFiltradas = actividadesFavoritas.filter(act => {
-                  const tempOk = minTemp >= act.temperatura[0] && maxTemp <= act.temperatura[1];
-                  const climaOk = act.estado.some(e => estadosDelDia.includes(e.toLowerCase()));
-                  return tempOk && climaOk;
-                });
-
-                return (
-                  <>
-                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <span>🌟</span> Actividades hoy
-                    </Typography>
-                    
-                    {actividadesFiltradas.length > 0 ? (
-                      <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 1fr)',
-                        gap: 1,
-                        overflowY: 'auto',
-                        maxHeight: '200px'
-                      }}>
-                        {actividadesFiltradas.map((act) => (
-                          <Box key={act.name} sx={{ 
-                            textAlign: 'center',
-                            p: 0.5
-                          }}>
-                            <Box
-                              component="img"
-                              src={act.image}
-                              alt={act.name}
-                              sx={{ 
-                                width: 40, 
-                                height: 40, 
-                                borderRadius: '8px',
-                                objectFit: 'cover',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                mb: 0.5
-                              }}
-                            />
-                            <Typography variant="caption" sx={{ 
-                              color: 'white',
-                              fontSize: '0.7rem',
-                              display: 'block',
-                              lineHeight: 1.1
-                            }}>
-                              {act.name}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Box>
-                    ) : (
-                      <Typography variant="body2" sx={{ 
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        fontStyle: 'italic',
-                        textAlign: 'center',
-                        mt: 1
-                      }}>
-                        {pronosticoHoy.length > 0 
-                          ? 'No hay actividades compatibles' 
-                          : 'Esperando datos del clima...'}
-                      </Typography>
-                    )}
-                  </>
-                );
-              })()}
-            </Card>  */}
           </Stack>
-          {/*cards para los siguientes días*/}
+
+          {/* 🌤️ Pronóstico diario */}
           <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" sx={{ color: 'white', mb: 2, textAlign: 'center' }}>
-            Pronóstico diario y actividades
-        </Typography>
-
-        {/* Navegación */}
-        <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-            <Button
-            disabled={diaVisibleIndex === 0}
-            onClick={() => setDiaVisibleIndex(diaVisibleIndex - 1)}
-            sx={{ color: 'white', fontSize: '1.5rem' }}
-            >
-             {'◀'}
-            </Button>
-            <Typography variant="subtitle1" sx={{ color: 'white' }}>
-            {new Date(diaActual).toLocaleDateString('es-CL', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            })} {minTempDiaActual && maxTempDiaActual ? `(${minTempDiaActual}°C / ${maxTempDiaActual}°C)` : ''}
+            <Typography variant="h6" sx={{ color: 'white', mb: 2, textAlign: 'center' }}>
+              Pronóstico diario
             </Typography>
-            <Button
-            disabled={diaVisibleIndex === diasCompletos.length - 1}
-            onClick={() => setDiaVisibleIndex(diaVisibleIndex + 1)}
-            sx={{ color: 'white', fontSize: '1.5rem' }}
-            >
-            {'▶'}
-            </Button>
-        </Box>
 
-        {/* Pronóstico horario */}
-        <Box display="flex" alignItems="center">
-        <Button
-            onClick={() => setForecastCardIndex(Math.max(forecastCardIndex - CARDS_PER_VIEW, 0))}
-            disabled={forecastCardIndex === 0}
-            sx={{
-                color: 'white',
-                fontSize: '1.5rem',
-                minWidth: '40px',
-                borderRadius: '50%',
-                width: 40,
-                height: 40,
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                },
-            }}
-            >
-        {'<'}
-        </Button>
+            {/* Navegación entre días */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+              <Button disabled={diaVisibleIndex === 0} onClick={() => setDiaVisibleIndex(diaVisibleIndex - 1)} sx={{ color: 'white', fontSize: '1.5rem' }}>
+                {'◀'}
+              </Button>
+              <Typography variant="subtitle1" sx={{ color: 'white' }}>
+                {new Date(diaActual).toLocaleDateString('es-CL', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })} {minTempDiaActual && maxTempDiaActual ? `(${minTempDiaActual}°C / ${maxTempDiaActual}°C)` : ''}
+              </Typography>
+              <Button disabled={diaVisibleIndex === diasCompletos.length - 1} onClick={() => setDiaVisibleIndex(diaVisibleIndex + 1)} sx={{ color: 'white', fontSize: '1.5rem' }}>
+                {'▶'}
+              </Button>
+            </Box>
 
-        <Stack direction="row" spacing={1} sx={{ overflowX: 'hidden', width: '100%', justifyContent: 'center' }}>
-          {cardsVisibles.length > 0 ? (
-            cardsVisibles.map(renderPronosticoHorario)
-          ) : (
-            <Typography variant="body2" sx={{ color: 'white', px: 2 }}>
-              No hay datos disponibles para este día.
-            </Typography>
-          )}
-        </Stack>
+            {/* Pronóstico por bloques horarios */}
+            <Box display="flex" alignItems="center">
+              <Button
+                onClick={() => setForecastCardIndex(Math.max(forecastCardIndex - CARDS_PER_VIEW, 0))}
+                disabled={forecastCardIndex === 0}
+                sx={{
+                  color: 'white',
+                  fontSize: '1.5rem',
+                  minWidth: '40px',
+                  borderRadius: '50%',
+                  width: 40,
+                  height: 40,
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                }}
+              >
+                {'<'}
+              </Button>
 
-        <Button
-            onClick={() =>
-                setForecastCardIndex((prev) =>
-                prev + CARDS_PER_VIEW < datosDiaActual.length ? prev + CARDS_PER_VIEW : prev
-                )
-            }
-            disabled={forecastCardIndex + CARDS_PER_VIEW >= datosDiaActual.length}
-            sx={{
-                color: 'white',
-                fontSize: '1.5rem',
-                minWidth: '40px',
-                borderRadius: '50%',
-                width: 40,
-                height: 40,
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                },
-            }}
-            >
-        {'>'}
-        </Button>
-        </Box>
-        {/* Actividades recomendadas */}
-        <Box sx={{
-            mt: 2,
-            p: 1,
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: 1
-        }}>
-            <Typography variant="subtitle2" sx={{
-            color: 'white',
-            mb: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            }}>
-            <span>🌟</span> Actividades recomendadas
-            </Typography>
-            {(() => {
-            const temps = datosDiaActual;
-            const minTemp = temps.length > 0 ? Math.min(...temps.map(item => item.main.temp_min)) : 0;
-            const maxTemp = temps.length > 0 ? Math.max(...temps.map(item => item.main.temp_max)) : 0;
-            const estadosDelDia = temps.map(item => traducirMainClima(item.weather[0].main).toLowerCase());
+              <Stack direction="row" spacing={1} sx={{ overflowX: 'hidden', width: '100%', justifyContent: 'center' }}>
+                {cardsVisibles.length > 0 ? (
+                  cardsVisibles.map(renderPronosticoHorario)
+                ) : (
+                  <Typography variant="body2" sx={{ color: 'white', px: 2 }}>
+                    No hay datos disponibles para este día.
+                  </Typography>
+                )}
+              </Stack>
 
-            const activitiesData = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-            const favoritosGuardados = activitiesData.undefined || [];
-            const actividadesFavoritas = availableActivities.filter(act =>
-                favoritosGuardados.includes(act.name)
-            );
-
-            const actividadesFiltradas = actividadesFavoritas.filter(act => {
-                const tempOk = minTemp >= act.temperatura[0] && maxTemp <= act.temperatura[1];
-                const climaOk = act.estado.some(e => estadosDelDia.includes(e.toLowerCase()));
-                return tempOk && climaOk;
-            });
-
-            return actividadesFiltradas.length > 0 ? (
-                <Stack direction="row" spacing={2} sx={{
-                flexWrap: 'wrap',
-                gap: 1.5,
-                justifyContent: 'left'
-                }}>
-                {actividadesFiltradas.map((act) => (
-                    <Box key={act.name} sx={{
-                    textAlign: 'center',
-                    width: 80,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-                    }}>
-                    <Box
-                        component="img"
-                        src={act.image}
-                        alt={act.name}
-                        sx={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: '8px',
-                        objectFit: 'cover',
-                        border: '2px solid rgba(255, 255, 255, 0.3)',
-                        mb: 0.5
-                        }}
-                    />
-                    <Typography variant="caption" sx={{
-                        color: 'white',
-                        fontSize: '0.75rem',
-                        lineHeight: 1.2,
-                        display: 'block'
-                    }}>
-                        {act.name}
-                    </Typography>
-                    </Box>
-                ))}
-                </Stack>
-            ) : (
-                <Typography variant="body2" sx={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontStyle: 'italic',
-                textAlign: 'center'
-                }}>
-                No hay actividades compatibles con el clima de este día
-                </Typography>
-            );
-            })()}
-        </Box>
-        </Box>
-
+              <Button
+                onClick={() =>
+                  setForecastCardIndex((prev) =>
+                    prev + CARDS_PER_VIEW < datosDiaActual.length ? prev + CARDS_PER_VIEW : prev
+                  )
+                }
+                disabled={forecastCardIndex + CARDS_PER_VIEW >= datosDiaActual.length}
+                sx={{
+                  color: 'white',
+                  fontSize: '1.5rem',
+                  minWidth: '40px',
+                  borderRadius: '50%',
+                  width: 40,
+                  height: 40,
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                }}
+              >
+                {'>'}
+              </Button>
+            </Box>
+          </Box>
         </>
       )}
     </Box>
-  );
+  </>
+);
+
 }
 export default WeatherStart2;
