@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Calendar from 'react-calendar';
 import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
 import './CalendarStyles.css';
 import { getForecastByCity } from '../api/weather';
 import { availableActivities } from './activities';
+import { CityContext } from './CityContext';
 
 // Agrupa forecast por día (YYYY-MM-DD)
 const agruparForecastPorDia = (lista) => {
@@ -43,6 +44,7 @@ function CalendarComponent() {
   const [activitiesByDate, setActivitiesByDate] = useState({});
   const [forecasts, setForecasts] = useState({});
   const navigate = useNavigate();
+  const { setHasCalendarAlert } = useContext(CityContext);
 
   useEffect(() => {
     const savedActivities = JSON.parse(localStorage.getItem('activitiesData')) || {};
@@ -50,7 +52,6 @@ function CalendarComponent() {
 
     const fetchForecasts = async () => {
       const forecastCache = {};
-
       const fetchPromises = Object.entries(savedActivities).map(async ([fecha, data]) => {
         const location = data.location;
         if (!location) return;
@@ -72,6 +73,48 @@ function CalendarComponent() {
     fetchForecasts();
   }, []);
 
+  // Nuevo useEffect para verificar y establecer la alerta
+  useEffect(() => {
+    let redDayFound = false;
+
+    // Iterar sobre las fechas con actividades guardadas
+    for (const dateKey in activitiesByDate) {
+      const dayData = activitiesByDate[dateKey];
+      const forecastForDay = forecasts[dateKey];
+
+      // Si no hay datos de actividad o pronóstico, continuar
+      if (!dayData?.activities?.length || !forecastForDay?.length) {
+        continue;
+      }
+      
+      const temps = forecastForDay.map(item => item.main.temp);
+      const minTemp = Math.min(...temps);
+      const maxTemp = Math.max(...temps);
+      const weatherStates = [...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main)))];
+
+      let allPossible = true;
+      for (const activityName of dayData.activities) {
+        const activity = availableActivities.find(a => a.name === activityName);
+        if (activity) {
+          const tempOk = minTemp >= activity.temperatura[0] && maxTemp <= activity.temperatura[1];
+          const weatherOk = activity.estado.some(e => weatherStates.includes(e));
+          if (!tempOk || !weatherOk) {
+            allPossible = false;
+            break; 
+          }
+        }
+      }
+
+      if (!allPossible) {
+        redDayFound = true;
+        break; // Si encontramos un día rojo, no necesitamos seguir buscando
+      }
+    }
+    
+    setHasCalendarAlert(redDayFound);
+
+  }, [activitiesByDate, forecasts, setHasCalendarAlert]);
+
   const handleDateChange = (newDate) => {
     setDate(newDate);
     const formattedDate = newDate.toISOString().split('T')[0];
@@ -85,24 +128,21 @@ function CalendarComponent() {
     const dayData = activitiesByDate[formattedDate];
 
     if (!dayData || !dayData.activities || dayData.activities.length === 0) {
-      return null; // sin actividades
+      return null;
     }
 
     const forecastForDay = forecasts[formattedDate];
 
     if (!forecastForDay || forecastForDay.length === 0) {
-      return 'day-gray'; // sin pronóstico disponible
+      return 'day-gray';
     }
 
     const temps = forecastForDay.map(item => item.main.temp);
     const minTemp = Math.min(...temps);
     const maxTemp = Math.max(...temps);
-    const weatherStates = [
-      ...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main)))
-    ];
+    const weatherStates = [...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main)))];
 
     let allPossible = true;
-
     for (const activityName of dayData.activities) {
       const activity = availableActivities.find(a => a.name === activityName);
       if (activity) {
