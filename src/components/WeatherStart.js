@@ -10,6 +10,8 @@ import {
   Typography, //texto con estilos
   Card, //tarjeta con bordes y sombra
   Stack, //organizar algo horizontal o verticalmente
+  Alert, // Importar Alert
+  AlertTitle, // Importar AlertTitle
 } from '@mui/material';
 
 //actualizar estados del componente (estado actual, funcion para actualizar estado = valor de inicio)
@@ -26,7 +28,8 @@ function WeatherStart() {
   const [viento, setWind] = useState('');
   const [lluvia, setLluvia] = useState(0);
   const [icono, setIcono] = useState('');
-  const { setCity: setGlobalCity } = useContext(CityContext);
+  const { setCity: setGlobalCity, hasCalendarAlert } = useContext(CityContext); // Obtener el estado de la alerta
+
   const traducirMainClima = (main) => {
     const traducciones = {
       Thunderstorm: 'Tormenta', Drizzle: 'lluvioso', Rain: 'lluvioso', Snow: 'Nieve',
@@ -228,6 +231,15 @@ function WeatherStart() {
         boxShadow: 3,
       }}
     >
+      {/* --- MENSAJE DE ADVERTENCIA --- */}
+      {hasCalendarAlert && (
+        <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
+          <AlertTitle>Advertencia</AlertTitle>
+          Una o más actividades registradas en el calendario <strong>ya no se recomiendan</strong> debido a las condiciones climáticas actuales.
+        </Alert>
+      )}
+      {/* ----------------------------- */}
+      
       <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
         Buscar una ciudad
       </Typography>

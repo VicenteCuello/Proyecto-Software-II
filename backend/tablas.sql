@@ -14,3 +14,21 @@ CREATE TABLE activities (
   temperature_range INT[2],  -- Un array con dos valores (min y max temperatura)
   weather_conditions TEXT[]  -- Un array de textos con los posibles estados climáticos
 );
+
+-- Tabla de favoritos
+CREATE TABLE user_favorites (
+  user_id     INTEGER NOT NULL REFERENCES users(id),
+  activity_id INTEGER NOT NULL REFERENCES activities(id),
+  created_at  TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (user_id, activity_id)
+);
+
+-- Tabla de actividades programadas por el usuario
+CREATE TABLE user_scheduled_activities (
+  user_id INTEGER REFERENCES users(id),
+  activity_id INTEGER REFERENCES activities(id),
+  scheduled_date DATE NOT NULL,
+  location VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (user_id, activity_id, scheduled_date)
+);
