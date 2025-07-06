@@ -93,6 +93,86 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   res.json({ profile: result.rows[0] });
 });
 
+// → Obtener todas las actividades disponibles, no solo las favoritas
+app.get('/api/activities', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, name, image, temperature_range, weather_conditions FROM activities ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al cargar actividades.' });
+  }
+});
+
+// → Obtener lista de IDs de actividades favoritas del usuario
+app.get('/api/favorites', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool.query(
+      'SELECT activity_id FROM user_favorites WHERE user_id = $1',
+      [userId]
+    );
+    // Devolvemos un array de números
+    res.json(result.rows.map(r => r.activity_id));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al cargar favoritas.' });
+  }
+});
+
+// Obtener actividades favoritas con nombre e imagen
+app.get('/api/favorites/details', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool.query(
+      `SELECT a.id, a.name, a.image
+       FROM activities a
+       JOIN user_favorites uf ON uf.activity_id = a.id
+       WHERE uf.user_id = $1`,
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al cargar detalles de favoritas.' });
+  }
+});
+
+
+// → Marcar una actividad como favorita
+app.post('/api/favorites', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { activityId } = req.body;
+    await pool.query(
+      `INSERT INTO user_favorites(user_id, activity_id)
+       VALUES($1, $2)
+       ON CONFLICT DO NOTHING`,
+      [userId, activityId]
+    );
+    res.status(201).send();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al guardar favorita.' });
+  }
+});
+
+// → Quitar una actividad de favoritas
+app.delete('/api/favorites/:activityId', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { activityId } = req.params;
+    await pool.query(
+      'DELETE FROM user_favorites WHERE user_id = $1 AND activity_id = $2',
+      [userId, activityId]
+    );
+    res.status(204).send();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al eliminar favorita.' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
 

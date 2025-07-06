@@ -23,10 +23,40 @@ export function FavoriteActivities() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
 
-  useEffect(() => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    setSelectedActivities(savedActivities.favorites || []);
-  }, []);
+  const [activities, setActivities] = useState([]);
+
+useEffect(() => {
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/activities`);
+      const data = await response.json();
+      setActivities(data);
+    } catch (err) {
+      console.error('Error fetching activities:', err);
+    }
+  };
+  fetchActivities();
+}, []);
+
+
+ useEffect(() => {
+  const fetchFavorites = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/favorites/details`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      // data es [{id, name, image}, ...]
+      setSelectedActivities(data.map(item => item.name));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchFavorites();
+}, []);
+
 
   const toggleActivity = (activityName) => {
     setSelectedActivities(prev => 
@@ -36,13 +66,60 @@ export function FavoriteActivities() {
     );
   };
 
-  const handleSave = () => {
-    const saved = JSON.parse(localStorage.getItem('activitiesByDate')) || {};
-    saved.favorites = selectedActivities;
-    localStorage.setItem('activitiesByDate', JSON.stringify(saved));
+ const handleSave = async () => {
+  try {
+    const token = localStorage.getItem('authToken');
+
+    // IDs seleccionados actualmente en frontend
+    const selectedIds = activities
+      .filter(activity => selectedActivities.includes(activity.name))
+      .map(activity => activity.id);
+
+    // Obtener favoritos actuales del backend
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/favorites`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const currentFavorites = await response.json(); // [ids]
+
+    // Calcular IDs a agregar
+    const toAdd = selectedIds.filter(id => !currentFavorites.includes(id));
+    // Calcular IDs a eliminar
+    const toRemove = currentFavorites.filter(id => !selectedIds.includes(id));
+
+    // Agregar nuevos favoritos
+    for (const activityId of toAdd) {
+      console.log('Adding activityId:', activityId);
+      await fetch(`${process.env.REACT_APP_API_URL}/favorites`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ activityId })
+      });
+    }
+
+    // Eliminar deseleccionados
+    for (const activityId of toRemove) {
+      console.log('Removing activityId:', activityId);
+      await fetch(`${process.env.REACT_APP_API_URL}/favorites/${activityId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    }
+
     setOpenSnackbar(true);
     setTimeout(() => navigate('/'), 1000);
-  };
+  } catch (err) {
+    console.error(err);
+    alert('Error al guardar favoritos.');
+  }
+};
+
+
+
 
   const getActivityStyle = (isSelected) => {
     const baseColor = '#5767d0'; // Color base
