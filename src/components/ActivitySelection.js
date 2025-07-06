@@ -65,23 +65,46 @@ function ActivitySelection() {
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [activities, setActivities] = useState([]);
 
   // Cargar actividades y ubicación guardadas
-  useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem('activitiesData')) || {};
-    const dateData = savedData[date] || {};
-    
-    setSelectedActivities(dateData.activities || []);
-    
-    // Si hay ciudad guardada para esta fecha, cargarla
-    if (dateData.location) {
-      setCurrentCity(dateData.location);
-      setCityInput(dateData.location);
-      fetchWeather(dateData.location);
-    } else {
+useEffect(() => {
+  const fetchScheduledActivities = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/schedule?date=${date}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setSelectedActivities(data.map(item => item.name));
+      if (data.length > 0 && data[0].location) {
+        setCurrentCity(data[0].location);
+        setCityInput(data[0].location);
+        fetchWeather(data[0].location);
+      } else {
+        fetchWeather(currentCity);
+      }
+    } catch (err) {
+      console.error(err);
       fetchWeather(currentCity);
     }
-  }, [date]);
+  };
+
+  fetchScheduledActivities();
+}, [date]);
+
+useEffect(() => {
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/activities`);
+      const data = await response.json();
+      setActivities(data);
+    } catch (err) {
+      console.error('Error al cargar actividades:', err);
+    }
+  };
+  fetchActivities();
+}, []);
 
   const fetchWeather = async (city) => {
     try {
@@ -123,24 +146,31 @@ function ActivitySelection() {
   };
 
   const checkActivityViability = (activity) => {
-    if (!forecast || !forecast[date]) return 'gray';
-    
-    const dayForecast = forecast[date];
-    const temps = dayForecast.map(item => item.main.temp);
+    const dayForecast = forecast?.[date];
+    if (!dayForecast || !Array.isArray(dayForecast) || dayForecast.length === 0) {
+        return 'gray'; // Clima no disponible para el día, devuelve 'gray' seguro
+    }
+
+    const temps = dayForecast.map(item => item.main.temp).filter(temp => typeof temp === 'number');
+
+    if (temps.length === 0) {
+        return 'gray'; // No hay temperaturas válidas
+    }
+
     const minTemp = Math.min(...temps);
     const maxTemp = Math.max(...temps);
-    
+
     const weatherConditions = [...new Set(
-      dayForecast.map(item => translateWeatherMain(item.weather[0].main))
-    )];
+        dayForecast.map(item => item.weather?.[0]?.main ? translateWeatherMain(item.weather[0].main) : null)
+    )].filter(Boolean);
 
     const isTempOK = minTemp >= activity.temperatura[0] && maxTemp <= activity.temperatura[1];
-    const isWeatherOK = activity.estado.some(condition => 
-      weatherConditions.includes(condition)
-    );
+    const isWeatherOK = activity.estado.some(condition => weatherConditions.includes(condition));
 
     return isTempOK && isWeatherOK ? 'green' : 'red';
   };
+
+
 
   const toggleActivity = (activityName) => {
     setSelectedActivities(prev => 
@@ -150,25 +180,41 @@ function ActivitySelection() {
     );
   };
 
-  const handleSave = () => {
-    // Leer el objeto completo actual del localStorage
-    const savedData = JSON.parse(localStorage.getItem('activitiesData')) || {};
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
 
-    // Insertar o actualizar la fecha actual con las actividades seleccionadas y la ciudad actual
-    savedData[date] = {
-      activities: selectedActivities,
+      // Mapear nombres seleccionados a IDs
+      const activityIds = activities
+        .filter(a => selectedActivities.includes(a.name))
+        .map(a => a.id);
+
+
+      await fetch(`${process.env.REACT_APP_API_URL}/schedule`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          date: date, // 'YYYY-MM-DD'
+          activityIds: activityIds,
+          location: currentCity
+        })
+      });
+      console.log('Enviando al backend:', {
+        date,
+        activityIds,
       location: currentCity
-    };
-
-    // Guardar de vuelta en localStorage de forma persistente
-    localStorage.setItem('activitiesData', JSON.stringify(savedData));
-
-    // Mostrar confirmación visual
-    setOpenSnackbar(true);
-
-    // Volver al calendario tras 1 segundo
-    setTimeout(() => navigate('/calendar'), 1000);
+      });
+      setOpenSnackbar(true);
+      setTimeout(() => navigate('/calendar'), 1000);
+    } catch (err) {
+      console.error(err);
+      alert('Error al guardar actividades.');
+    }
   };
+
 
   const handleSearch = () => {
     if (cityInput.trim()) {
@@ -322,17 +368,17 @@ function ActivitySelection() {
         boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
       }}>
         <List>
-          {availableActivities.map((activity) => {
+          {activities.map((activity) => {
             const viability = checkActivityViability(activity);
             const isSelected = selectedActivities.includes(activity.name);
 
             return (
               <ListItem
                 key={activity.name}
-                button
                 onClick={() => toggleActivity(activity.name)}
                 sx={getActivityStyle(activity)}
               >
+
                 <ListItemIcon>
                   <img 
                     src={activity.image} 

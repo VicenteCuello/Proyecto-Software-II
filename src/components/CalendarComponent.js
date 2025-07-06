@@ -1,23 +1,29 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
-import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
 import './CalendarStyles.css';
-import { getForecastByCity } from '../api/weather';
-import { availableActivities } from './activities';
-import { CityContext } from './CityContext';
 
-// Agrupa forecast por día (YYYY-MM-DD)
-const agruparForecastPorDia = (lista) => {
-  return lista.reduce((acc, item) => {
-    const fecha = new Date(item.dt * 1000).toISOString().split('T')[0];
-    if (!acc[fecha]) acc[fecha] = [];
-    acc[fecha].push(item);
+async function getForecastByCity(city) {
+  const API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY;
+  const response = await fetch(
+    `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${API_KEY}&lang=es`
+  );
+  if (!response.ok) {
+    throw new Error('Error al obtener el pronóstico del clima');
+  }
+  return await response.json();
+}
+
+function agruparForecastPorDia(list) {
+  return list.reduce((acc, item) => {
+    const date = item.dt_txt.split(' ')[0]; // 'YYYY-MM-DD'
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(item);
     return acc;
   }, {});
-};
+}
 
-// Traducción del clima
+
 const traducirMainClima = (main) => {
   const traducciones = {
     Thunderstorm: 'tormenta',
@@ -43,82 +49,107 @@ function CalendarComponent() {
   const [date, setDate] = useState(new Date());
   const [activitiesByDate, setActivitiesByDate] = useState({});
   const [forecasts, setForecasts] = useState({});
-  const navigate = useNavigate();
-  const { setHasCalendarAlert } = useContext(CityContext);
+  const [activities, setActivities] = useState([]);
 
   useEffect(() => {
-    const savedActivities = JSON.parse(localStorage.getItem('activitiesData')) || {};
-    setActivitiesByDate(savedActivities);
-
     const fetchForecasts = async () => {
-      const forecastCache = {};
-      const fetchPromises = Object.entries(savedActivities).map(async ([fecha, data]) => {
-        const location = data.location;
-        if (!location) return;
+      try {
+        const forecastCache = {};
 
-        try {
-          const forecastData = await getForecastByCity(location);
-          const grouped = agruparForecastPorDia(forecastData.list);
-          forecastCache[fecha] = grouped[fecha] || [];
-        } catch (error) {
-          console.error(`No se pudo obtener el pronóstico para ${location} en ${fecha}.`, error);
-          forecastCache[fecha] = [];
-        }
-      });
+        const dates = Object.keys(activitiesByDate);
 
-      await Promise.all(fetchPromises);
-      setForecasts(forecastCache);
-    };
+        for (const date of dates) {
+          const dayActivities = activitiesByDate[date];
+          if (!dayActivities || dayActivities.length === 0) continue;
 
-    fetchForecasts();
-  }, []);
+          const location = dayActivities[0].location; // Asumimos misma ciudad para todas las actividades de ese día
+          if (!location) continue;
 
-  // Nuevo useEffect para verificar y establecer la alerta
-  useEffect(() => {
-    let redDayFound = false;
-
-    // Iterar sobre las fechas con actividades guardadas
-    for (const dateKey in activitiesByDate) {
-      const dayData = activitiesByDate[dateKey];
-      const forecastForDay = forecasts[dateKey];
-
-      // Si no hay datos de actividad o pronóstico, continuar
-      if (!dayData?.activities?.length || !forecastForDay?.length) {
-        continue;
-      }
-      
-      const temps = forecastForDay.map(item => item.main.temp);
-      const minTemp = Math.min(...temps);
-      const maxTemp = Math.max(...temps);
-      const weatherStates = [...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main)))];
-
-      let allPossible = true;
-      for (const activityName of dayData.activities) {
-        const activity = availableActivities.find(a => a.name === activityName);
-        if (activity) {
-          const tempOk = minTemp >= activity.temperatura[0] && maxTemp <= activity.temperatura[1];
-          const weatherOk = activity.estado.some(e => weatherStates.includes(e));
-          if (!tempOk || !weatherOk) {
-            allPossible = false;
-            break; 
+          try {
+            const forecastData = await getForecastByCity(location);
+            const grouped = agruparForecastPorDia(forecastData.list);
+            forecastCache[date] = grouped[date] || [];
+          } catch (error) {
+            console.error(`No se pudo obtener el pronóstico para ${location} en ${date}.`, error);
+            forecastCache[date] = [];
           }
         }
-      }
 
-      if (!allPossible) {
-        redDayFound = true;
-        break; // Si encontramos un día rojo, no necesitamos seguir buscando
+        setForecasts(forecastCache);
+        console.log('Forecasts cargados:', forecastCache);
+      } catch (error) {
+        console.error('Error general al cargar forecasts:', error);
       }
+    };
+
+    if (Object.keys(activitiesByDate).length > 0) {
+      fetchForecasts();
     }
-    
-    setHasCalendarAlert(redDayFound);
+  }, [activitiesByDate]);
 
-  }, [activitiesByDate, forecasts, setHasCalendarAlert]);
+
+  useEffect(() => {
+    const fetchScheduledActivities = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        console.log('Intentando fetch /api/schedule con token:', token);
+
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/schedule`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        console.log('Response fetch /api/schedule:', response);
+        const data = await response.json();
+        console.log('Data fetch /api/schedule:', data);
+
+        // procesamiento...
+        const map = {};
+        data.forEach(item => {
+          const d = new Date(item.scheduled_date).toISOString().split('T')[0]; // normaliza a 'YYYY-MM-DD'
+          if (!map[d]) {
+            map[d] = [];
+          }
+          map[d].push(item);
+        });
+        setActivitiesByDate(map);
+        console.log('activitiesByDate actualizado:', map);
+
+      } catch (error) {
+        console.error('Error al obtener actividades agendadas:', error);
+      }
+    };
+
+    fetchScheduledActivities();
+  }, []);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/activities`);
+        const data = await response.json();
+        setActivities(data);
+      } catch (error) {
+        console.error('Error al cargar actividades:', error);
+      }
+    };
+
+    fetchActivities();
+  }, []);
+
 
   const handleDateChange = (newDate) => {
     setDate(newDate);
     const formattedDate = newDate.toISOString().split('T')[0];
-    navigate(`/select-activities/${formattedDate}`);
+    window.location.href = `/select-activities/${formattedDate}`;
+  };
+
+  const tileContent = ({ date, view }) => {
+    if (view !== 'month') return null;
+    const formattedDate = date.toISOString().split('T')[0];
+    console.log('activitiesByDate:', activitiesByDate);
+    return activitiesByDate[formattedDate] ? (
+      <div className="activity-indicator"></div>
+    ) : null;
   };
 
   const tileClassName = ({ date, view }) => {
@@ -127,7 +158,7 @@ function CalendarComponent() {
     const formattedDate = date.toISOString().split('T')[0];
     const dayData = activitiesByDate[formattedDate];
 
-    if (!dayData || !dayData.activities || dayData.activities.length === 0) {
+    if (!dayData || dayData.length === 0) {
       return null;
     }
 
@@ -143,8 +174,8 @@ function CalendarComponent() {
     const weatherStates = [...new Set(forecastForDay.map(item => traducirMainClima(item.weather[0].main)))];
 
     let allPossible = true;
-    for (const activityName of dayData.activities) {
-      const activity = availableActivities.find(a => a.name === activityName);
+    for (const activityItem of dayData) {
+      const activity = activities.find(a => a.name === activityItem.name);
       if (activity) {
         const tempOk = minTemp >= activity.temperatura[0] && maxTemp <= activity.temperatura[1];
         const weatherOk = activity.estado.some(e => weatherStates.includes(e));
@@ -158,33 +189,16 @@ function CalendarComponent() {
     return allPossible ? 'day-green' : 'day-red';
   };
 
-  const tileContent = ({ date, view }) => {
-    if (view !== 'month') return null;
-    const formattedDate = date.toISOString().split('T')[0];
-    const hasActivities = activitiesByDate[formattedDate]?.activities?.length > 0;
-    return hasActivities ? <div className="activity-indicator" /> : null;
-  };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#07498d',
-      }}
-    >
-      <h1 className="titulo-calendario">Selecciona una fecha para agendar</h1>
-      <div style={{ zIndex: 10 }}>
-        <Calendar
-          onChange={handleDateChange}
-          value={date}
-          tileContent={tileContent}
-          tileClassName={tileClassName}
-        />
-      </div>
+    <div style={{ padding: '40px', background: '#07498d', height: '100vh' }}>
+      <h1 className="titulo-calendario">Calendario</h1>
+      <Calendar
+        onChange={handleDateChange}
+        value={date}
+        tileContent={tileContent}
+        tileClassName={tileClassName}
+      />
     </div>
   );
 }

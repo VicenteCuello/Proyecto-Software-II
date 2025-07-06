@@ -22,3 +22,13 @@ CREATE TABLE user_favorites (
   created_at  TIMESTAMP DEFAULT NOW(),
   PRIMARY KEY (user_id, activity_id)
 );
+
+-- Tabla de actividades programadas por el usuario
+CREATE TABLE user_scheduled_activities (
+  user_id INTEGER REFERENCES users(id),
+  activity_id INTEGER REFERENCES activities(id),
+  scheduled_date DATE NOT NULL,
+  location VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (user_id, activity_id, scheduled_date)
+);
