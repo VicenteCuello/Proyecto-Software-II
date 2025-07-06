@@ -69,7 +69,7 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
       }}
     >
       <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
-        Actividades recomendadas
+        🌟 Actividades recomendadas
       </Typography>
 
       {/* Navegación de días */}
@@ -455,13 +455,13 @@ function WeatherStart() {
           }}
         />
       </form>
-      <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
+      <Typography variant="h5" align="center" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
         Tiempo de hoy
       </Typography>
       {/*mostrar card con el clima actual */}
       {submitted && (
         <>
-          <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+          <Stack direction="row" spacing={2} justifyContent="center" sx={{ mb: 3 }}>
             {/* temperatura y estado climático del día actual */}
             <Card sx={{width: '200px', height: '130px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', p: 2, color: 'white', }} elevation={4}>
               <Typography variant="h6" gutterBottom>
@@ -493,7 +493,7 @@ function WeatherStart() {
               <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
             </Card>
           </Stack>
-          <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
+          <Typography variant="h6" align="center" sx={{ mb: 2, color: 'white' }}>
             Pronóstico diario
           </Typography>
 
@@ -516,7 +516,7 @@ function WeatherStart() {
             </Button>
 
             <Box sx={{ minWidth: 220, width: '100%' }}>
-              <Typography variant="subtitle2" sx={{ color: 'white', mb: 1 }}>
+              <Typography variant="subtitle2" align="center" sx={{ color: 'white', mb: 1 }}>
                 {(() => {
                   const fecha = diasPronostico[indiceInicio];
                   const fechaFormateada = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {
