@@ -430,7 +430,7 @@ function WeatherStart() {
       }}
     > 
       <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
-        Buscar una ciudad
+        🌆 Buscar una ciudad
       </Typography>
 
       <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
@@ -456,7 +456,7 @@ function WeatherStart() {
         />
       </form>
       <Typography variant="h5" align="center" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
-        Tiempo de hoy
+        ☀️ Tiempo de hoy
       </Typography>
       {/*mostrar card con el clima actual */}
       {submitted && (
@@ -494,7 +494,7 @@ function WeatherStart() {
             </Card>
           </Stack>
           <Typography variant="h6" align="center" sx={{ mb: 2, color: 'white' }}>
-            Pronóstico diario
+            🔮 Pronóstico diario
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
