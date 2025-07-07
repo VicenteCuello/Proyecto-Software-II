@@ -54,7 +54,7 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
         position: 'fixed',
         left: 120,
         top: 60,
-        width: 320,
+        width: 350,
         //height: '85vh',
         height: '50vh',
         backgroundColor: 'rgba(0,0,0,0.7)',
@@ -154,6 +154,96 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
     </Box>
   );
 }
+
+function ActividadesAgendadas({ diasPronostico, scheduledActivities }) {
+  console.log("📆 Dias del pronóstico:", diasPronostico);
+  console.log("📌 Actividades agendadas recibidas como props:", scheduledActivities);
+  return (
+    <Box
+      sx={{
+        position: 'fixed',
+        left: 120,
+        top: 455,
+        width: 350,
+        height: '30vh',
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        borderRadius: 2,
+        padding: 2,
+        overflowY: 'auto',
+        color: 'white',
+        boxShadow: 3,
+        fontFamily: "'Roboto', sans-serif",
+        zIndex: 1100,
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold' }}>
+        📅 Actividades agendadas
+      </Typography>
+
+      {diasPronostico.map((fecha) => {
+        const actividadesDelDia = scheduledActivities.filter(
+          (act) => {
+          const fechaLocal = new Date(act.scheduled_date).toLocaleDateString('sv-SE');
+          return fechaLocal === fecha;
+        });
+        console.log(`📅 Día ${fecha} → actividades encontradas:`, actividadesDelDia);
+        const fechaFormateada = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+
+        return (
+          <Box key={fecha} sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              {fechaFormateada}
+            </Typography>
+
+            {actividadesDelDia.length > 0 ? (
+              actividadesDelDia.map((act) => (
+                <Box
+                  key={act.id}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    mb: 1,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: 1,
+                    padding: 1,
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={act.image}
+                    alt={act.name}
+                    sx={{ width: 40, height: 40, borderRadius: 1, objectFit: 'cover' }}
+                  />
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {act.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
+                      Ciudad: {act.location}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                No hay actividades agendadas para este día.
+              </Typography>
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
 //actualizar estados del componente (estado actual, funcion para actualizar estado = valor de inicio)
 function WeatherStart() {
   const [inputCity, setInputCity] = useState('');
@@ -169,6 +259,7 @@ function WeatherStart() {
   const [lluvia, setLluvia] = useState(0);
   const [icono, setIcono] = useState('');
   const { setCity: setGlobalCity, hasCalendarAlert } = useContext(CityContext); // Obtener el estado de la alerta
+  
   //const [hasCalendarAlert, setHasCalendarAlert] = useState(true);
 
   const traducirMainClima = (main) => {
@@ -210,6 +301,31 @@ function WeatherStart() {
 
     fetchFavorites();
   }, []);
+
+  //obtener actividades agendadas
+  const [scheduledActivities, setScheduledActivities] = useState([]); // actividades agendadas
+
+  const fetchScheduledActivities = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/schedule`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error('Error al obtener actividades agendadas');
+      const data = await res.json();
+      console.log("📦 Actividades agendadas recibidas del backend:", data);
+      setScheduledActivities(data);
+    } catch (error) {
+      console.error("⛔ Error al cargar actividades agendadas:", error);
+      setScheduledActivities([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchScheduledActivities();
+  }, [fetchScheduledActivities]);
 
   const obtenerClimaPorCiudad = useCallback(async (nombreCiudad) => {
     try {
@@ -404,7 +520,7 @@ function WeatherStart() {
             top: 550,
             left: 50,
             width: 320,
-            zIndex: 1100,
+            zIndex: 1150,
           }}
         >
           <Alert
@@ -441,7 +557,7 @@ function WeatherStart() {
       sx={{
         position: 'fixed',
         top: '60px',
-        right: '100px',
+        right: '120px',
         width: '90vw',
         maxWidth: 700,
         height: 600,
@@ -587,6 +703,7 @@ function WeatherStart() {
         favoriteActivities={favoriteActivities}
         traducirMainClima={traducirMainClima}
       />
+      <ActividadesAgendadas diasPronostico={diasPronostico} scheduledActivities={scheduledActivities} />
     </>
   );
 }
