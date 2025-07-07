@@ -155,8 +155,8 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
 }
 
 function ActividadesAgendadas({ diasPronostico, scheduledActivities, forecastPorCiudad, traducirMainClima }) {
-  console.log("📆 Dias del pronóstico:", diasPronostico);
-  console.log("📌 Actividades agendadas recibidas como props:", scheduledActivities);
+  console.log(" Dias del pronóstico:", diasPronostico);
+  console.log("Actividades agendadas recibidas como props:", scheduledActivities);
   return (
     <Box
      sx={{
@@ -200,7 +200,7 @@ function ActividadesAgendadas({ diasPronostico, scheduledActivities, forecastPor
 
             {actividadesDelDia.length > 0 ? (
               actividadesDelDia.map((act) => {
-                // 🔽 AQUÍ se hace el análisis usando act.location
+                // hacer análisis usando act.location
                 const tempsDia = (
                   forecastPorCiudad &&
                   act.location &&
@@ -310,7 +310,7 @@ function WeatherStart() {
         });
         const data = await response.json(); // [{id, name, image}, ...]
 
-        // Enlaza cada actividad favorita con su versión completa (que sí tiene temperatura y estado)
+        // enlazar cada actividad favorita con su versión completa (que tiene temperatura y estado)
         const favoritasCompletas = data.map((fav) => {
           const completa = availableActivities.find((a) => a.id === fav.id);
           return {
@@ -353,7 +353,7 @@ function WeatherStart() {
       });
 
       setScheduledActivities(enriquecidas);
-      console.log("📦 Actividades agendadas recibidas del backend:", data);
+      console.log("Actividades agendadas recibidas del backend:", data);
       const ciudadesUnicas = [...new Set(data.map(act => act.location))];
 
       const pronosticos = await Promise.all(
@@ -367,7 +367,7 @@ function WeatherStart() {
       const forecastObj = Object.fromEntries(pronosticos);
       setForecastPorCiudad(forecastObj);
     } catch (error) {
-      console.error("⛔ Error al cargar actividades agendadas:", error);
+      console.error("Error al cargar actividades agendadas:", error);
       setScheduledActivities([]);
     }
   }, []);
@@ -407,10 +407,10 @@ function WeatherStart() {
   // agrupar datos-intervalos por día
   const agruparForecastPorDia = (lista) => {
     const listaPorDia = lista.reduce((acc, item) => {
-      // Fecha local basada en timestamp
+      //fecha local en timestamp
       const fechaLocal = new Date(item.dt * 1000);
 
-      // Construir clave yyyy-mm-dd con la fecha local
+      // armar fecha con fecha local
       const año = fechaLocal.getFullYear();
       const mes = String(fechaLocal.getMonth() + 1).padStart(2, '0');
       const dia = String(fechaLocal.getDate()).padStart(2, '0');
@@ -422,7 +422,7 @@ function WeatherStart() {
       return acc;
     }, {});
 
-    // Ordenar los arrays por hora ascendente dentro de cada día
+    // ordenar los arrays por hora ascendente dentro de cada día
     Object.keys(listaPorDia).forEach((fecha) => {
       listaPorDia[fecha].sort((a, b) => a.horaLocal - b.horaLocal);
     });
@@ -745,7 +745,7 @@ function WeatherStart() {
         </>
       )}
     </Box>
-    {/* Box actividades recomendadas fijo aparte */}
+    {/* Box actividades recomendadas fijo  */}
       <ActividadesRecomendadas
         diasPronostico={diasPronostico}
         forecast={forecast}
