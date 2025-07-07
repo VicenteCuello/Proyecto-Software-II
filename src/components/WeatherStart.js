@@ -3,6 +3,7 @@ import { getWeatherByCity, getForecastByCity, getWeatherByCoords } from '../api/
 import { availableActivities } from '../components/activities';
 import { CityContext } from './CityContext';
 import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
 
 
 import {
@@ -69,7 +70,7 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
       }}
     >
       <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold'}}>
-        🌟 Actividades recomendadas
+        🌟 Actividades favoritas recomendadas
       </Typography>
 
       {/* Navegación de días */}
@@ -392,27 +393,49 @@ function WeatherStart() {
   };
 
   
-  
+  const [mostrarAlerta, setMostrarAlerta] = useState(true);
   return (
     <>
     {/* Mensaje de advertencia fijo  */}
-      {hasCalendarAlert && (
+    {hasCalendarAlert && mostrarAlerta && (
         <Box
           sx={{
             position: 'fixed',
-            top: 500,
-            left: 120,
-            width: 350,
+            top: 550,
+            left: 50,
+            width: 320,
             zIndex: 1100,
           }}
         >
-          <Alert severity="warning" variant="filled" sx={{ borderRadius: 2 }}>
+          <Alert
+            severity="warning"
+            variant="filled"
+            sx={{ borderRadius: 2, position: 'relative' }}
+            action={
+              <Button
+                size="small"
+                onClick={() => setMostrarAlerta(false)}
+                sx={{
+                  color: 'white',
+                  minWidth: 'auto',
+                  padding: 0,
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </Button>
+            }
+          >
             <AlertTitle>Advertencia</AlertTitle>
             Una o más actividades registradas en el calendario{' '}
             <strong>ya no se recomiendan</strong> debido a las condiciones climáticas actuales.
           </Alert>
         </Box>
       )}
+      
+
     {/*mostrar clima*/}
     <Box
       sx={{
