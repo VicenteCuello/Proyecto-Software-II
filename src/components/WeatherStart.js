@@ -68,7 +68,7 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
         flexDirection: 'column',
       }}
     >
-      <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
+      <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold'}}>
         🌟 Actividades recomendadas
       </Typography>
 
@@ -141,7 +141,7 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
                   border: '2px solid rgba(255, 255, 255, 0.3)',
                 }}
               />
-              <Typography variant="body1">{act.name}</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{act.name}</Typography>
             </Box>
           ))}
         </Stack>
@@ -328,7 +328,7 @@ function WeatherStart() {
       <Card
         key={item.dt}
         sx={{
-          minWidth: 110,
+          minWidth: 115,
           //width: '150px',  
           marginRight: 1,
           backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)',
@@ -341,22 +341,22 @@ function WeatherStart() {
         }}
         elevation={2}
       >
-        <Typography variant="body2">{hora}</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{hora}</Typography>
         <Box component="img"
             src={`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`}
             alt={item.weather[0].description}
             sx={{ width: 40, height: 40 }}
         />
         <Box display="flex" flexDirection="column">
-          <Typography variant="caption" display="block" gutterBottom  sx={{"&::first-letter": {textTransform: "uppercase"}}}>
+          <Typography variant="caption" display="block" gutterBottom  sx={{ fontWeight: 'bold', "&::first-letter": {textTransform: "uppercase"}}}>
             {clima}
           </Typography>
-          <Typography variant="caption">🌡️ {temp}°C</Typography>
+          <Typography variant="caption" sx={{ fontWeight: 'bold' }}>🌡️ {temp}°C</Typography>
         </Box>
-        <Typography variant="caption" sx={{ color: '#FFFF' }}>
+        <Typography variant="caption" sx={{ color: '#FFFF', fontWeight: 'bold' }}>
           🌧️ {lluvia}%  
         </Typography>
-        <Typography variant="caption" sx={{ color: '#FFFF', marginLeft: '2px' }}>
+        <Typography variant="caption" sx={{ color: '#FFFF', marginLeft: '2px', fontWeight: 'bold' }}>
           💨 {item.wind.speed} m/s
         </Typography>
         
@@ -429,7 +429,7 @@ function WeatherStart() {
         boxShadow: 3,
       }}
     > 
-      <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
+      <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2, color: 'white', fontWeight: 'bold' }}>
         🌆 Buscar una ciudad
       </Typography>
 
@@ -455,7 +455,7 @@ function WeatherStart() {
           }}
         />
       </form>
-      <Typography variant="h5" align="center" component="h2" gutterBottom sx={{ mb: 2, color: 'white' }}>
+      <Typography variant="h5" align="center" component="h2" gutterBottom sx={{ mb: 2, color: 'white', fontWeight: 'bold'}}>
         ☀️ Tiempo de hoy
       </Typography>
       {/*mostrar card con el clima actual */}
@@ -464,11 +464,11 @@ function WeatherStart() {
           <Stack direction="row" spacing={2} justifyContent="center" sx={{ mb: 3 }}>
             {/* temperatura y estado climático del día actual */}
             <Card sx={{width: '200px', height: '130px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', p: 2, color: 'white', }} elevation={4}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 {ciudad}
               </Typography>
               <Box display="flex" alignItems="center" gap={0}>
-                <Typography variant="h3"> {temperature}<span style={{ verticalAlign: 'super', fontSize: '22px' }}>°C</span></Typography>
+                <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {temperature}<span style={{ verticalAlign: 'super', fontSize: '22px' }}>°C</span></Typography>
                 {icono && (
                   <Box
                     component="img"
@@ -478,22 +478,22 @@ function WeatherStart() {
                   />
                 )}
               </Box>
-              <Typography variant="body1" sx={{ mb: 1,"&::first-letter": {textTransform: "uppercase"}}}>
+              <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold', "&::first-letter": {textTransform: "uppercase"}}}>
                 {estadoClimatico}
               </Typography>
             </Card>
 
             {/* datos del clima actual */}
             <Card sx={{width: '250px', height: '130px', backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(5px)', textAlign: 'center', padding: '16px', color: 'white' }} elevation={4}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}> 
                 Detalles del clima
               </Typography>
-              <Typography variant="body1">💧 Humedad: {humedad}%</Typography>
-              <Typography variant="body1">☁️ Nubosidad: {nubosidad}%</Typography>
-              <Typography variant="body1">💨 Viento: {viento} m/s</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>💧 Humedad: {humedad}%</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>☁️ Nubosidad: {nubosidad}%</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>💨 Viento: {viento} m/s</Typography>
             </Card>
           </Stack>
-          <Typography variant="h6" align="center" sx={{ mb: 2, color: 'white' }}>
+          <Typography variant="h6" align="center" sx={{ mb: 2, color: 'white', fontWeight: 'bold'}}>
             🔮 Pronóstico diario
           </Typography>
 
@@ -516,7 +516,7 @@ function WeatherStart() {
             </Button>
 
             <Box sx={{ minWidth: 220, width: '100%' }}>
-              <Typography variant="subtitle2" align="center" sx={{ color: 'white', mb: 1 }}>
+              <Typography variant="subtitle1" align="center" sx={{ color: 'white', mb: 1, fontWeight: 'bold' }}>
                 {(() => {
                   const fecha = diasPronostico[indiceInicio];
                   const fechaFormateada = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {
@@ -529,7 +529,7 @@ function WeatherStart() {
                   const minTemp = temps.length > 0 ? Math.min(...temps.map(item => item.main.temp_min)).toFixed(1) : null;
                   const maxTemp = temps.length > 0 ? Math.max(...temps.map(item => item.main.temp_max)).toFixed(1) : null;
 
-                  return `${fechaFormateada}${minTemp && maxTemp ? ` (🌡️ Mín: ${minTemp}°C / Máx: ${maxTemp}°C)` : ''}`;
+                  return `${fechaFormateada}${minTemp && maxTemp ? `  (🌡️ Mín: ${minTemp}°C / Máx: ${maxTemp}°C)` : ''}`;
                 })()}
               </Typography>
               <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
