@@ -155,12 +155,12 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
   );
 }
 
-function ActividadesAgendadas({ diasPronostico, scheduledActivities }) {
+function ActividadesAgendadas({ diasPronostico, scheduledActivities, forecastPorCiudad, traducirMainClima }) {
   console.log("📆 Dias del pronóstico:", diasPronostico);
   console.log("📌 Actividades agendadas recibidas como props:", scheduledActivities);
   return (
     <Box
-      sx={{
+     sx={{
         position: 'fixed',
         left: 120,
         top: 455,
@@ -183,55 +183,83 @@ function ActividadesAgendadas({ diasPronostico, scheduledActivities }) {
       </Typography>
 
       {diasPronostico.map((fecha) => {
-        const actividadesDelDia = scheduledActivities.filter(
-          (act) => {
+        const actividadesDelDia = scheduledActivities.filter((act) => {
           const fechaLocal = new Date(act.scheduled_date).toLocaleDateString('sv-SE');
           return fechaLocal === fecha;
-        });
-        console.log(`📅 Día ${fecha} → actividades encontradas:`, actividadesDelDia);
-        const fechaFormateada = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
         });
 
         return (
           <Box key={fecha} sx={{ mb: 2 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-              {fechaFormateada}
+              {new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </Typography>
 
             {actividadesDelDia.length > 0 ? (
-              actividadesDelDia.map((act) => (
-                <Box
-                  key={act.id}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    mb: 1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    borderRadius: 1,
-                    padding: 1,
-                  }}
-                >
+              actividadesDelDia.map((act) => {
+                // 🔽 AQUÍ se hace el análisis usando act.location
+                const tempsDia = (
+                  forecastPorCiudad &&
+                  act.location &&
+                  forecastPorCiudad[act.location] &&
+                  forecastPorCiudad[act.location][fecha]
+                ) ? forecastPorCiudad[act.location][fecha] : [];
+                const minTempDia = tempsDia.length > 0 ? Math.min(...tempsDia.map(item => item.main.temp_min)) : null;
+                const maxTempDia = tempsDia.length > 0 ? Math.max(...tempsDia.map(item => item.main.temp_max)) : null;
+                const estadosDelDia = tempsDia.map(item => traducirMainClima(item.weather[0].main).toLowerCase());
+
+                const compatible = (() => {
+                  if (!act.temperatura || act.temperatura.length < 2) return false;
+                  if (!act.estado || !Array.isArray(act.estado)) return false;
+                  const tempOk = minTempDia >= act.temperatura[0] && maxTempDia <= act.temperatura[1];
+                  const climaOk = act.estado.some(e => estadosDelDia.includes(e.toLowerCase()));
+                  return tempOk && climaOk;
+                })();
+
+                return (
                   <Box
-                    component="img"
-                    src={act.image}
-                    alt={act.name}
-                    sx={{ width: 40, height: 40, borderRadius: 1, objectFit: 'cover' }}
-                  />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                      {act.name}
-                    </Typography>
-                    <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
-                      Ciudad: {act.location}
-                    </Typography>
+                    key={act.id}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      mb: 1,
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: 1,
+                      padding: 1,
+                    }}
+                  >
+                    {/* Círculo verde o rojo */}
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: '50%',
+                        backgroundColor: compatible ? 'green' : 'red',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Box
+                      component="img"
+                      src={act.image}
+                      alt={act.name}
+                      sx={{ width: 40, height: 40, borderRadius: 1, objectFit: 'cover' }}
+                    />
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                        {act.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
+                        Ciudad: {act.location}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              ))
+                );
+              })
             ) : (
               <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
                 No hay actividades agendadas para este día.
@@ -253,6 +281,7 @@ function WeatherStart() {
   const [temperature, setTemperature] = useState('');
   const [submitted, setSubmitted] = useState(false); //si se ingresa o envía una ciudad
   const [forecast, setForecast] = useState({}); // pronóstico proximos días
+  const [forecastPorCiudad, setForecastPorCiudad] = useState({});
   const [humedad, setHumidity] = useState('');
   const [nubosidad, setClouds] = useState('');
   const [viento, setWind] = useState('');
@@ -315,8 +344,29 @@ function WeatherStart() {
       });
       if (!res.ok) throw new Error('Error al obtener actividades agendadas');
       const data = await res.json();
+      const enriquecidas = data.map((act) => {
+        const completa = availableActivities.find((a) => a.id === act.id);
+        return {
+          ...act,
+          temperatura: completa?.temperatura || [],
+          estado: completa?.estado || []
+        };
+      });
+
+      setScheduledActivities(enriquecidas);
       console.log("📦 Actividades agendadas recibidas del backend:", data);
-      setScheduledActivities(data);
+      const ciudadesUnicas = [...new Set(data.map(act => act.location))];
+
+      const pronosticos = await Promise.all(
+        ciudadesUnicas.map(async (ciudad) => {
+          const data = await getForecastByCity(ciudad);
+          const datosAgrupados = agruparForecastPorDia(data.list);
+          return [ciudad, datosAgrupados];
+        })
+      );
+
+      const forecastObj = Object.fromEntries(pronosticos);
+      setForecastPorCiudad(forecastObj);
     } catch (error) {
       console.error("⛔ Error al cargar actividades agendadas:", error);
       setScheduledActivities([]);
@@ -703,8 +753,11 @@ function WeatherStart() {
         favoriteActivities={favoriteActivities}
         traducirMainClima={traducirMainClima}
       />
-      <ActividadesAgendadas diasPronostico={diasPronostico} scheduledActivities={scheduledActivities} />
-    </>
+      <ActividadesAgendadas diasPronostico={diasPronostico}
+        scheduledActivities={scheduledActivities}
+        forecastPorCiudad={forecastPorCiudad}
+        traducirMainClima={traducirMainClima}/>
+      </>
   );
 }
 export default WeatherStart;
