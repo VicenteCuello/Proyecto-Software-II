@@ -19,7 +19,7 @@ import {
 
 
 // Componente para mostrar actividades recomendadas en un box fijo
-function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities, traducirMainClima }) {
+function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities, traducirMainClima, ciudad }) {
   const [diaSeleccionado, setDiaSeleccionado] = useState(0);
 
   const handleDiaAnterior = () => {
@@ -70,9 +70,8 @@ function ActividadesRecomendadas({ diasPronostico, forecast, favoriteActivities,
       }}
     >
       <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold'}}>
-        🌟 Actividades favoritas recomendadas
+        🌟 Actividades favoritas recomendadas en {ciudad}
       </Typography>
-
       {/* Navegación de días */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Button
@@ -752,6 +751,7 @@ function WeatherStart() {
         forecast={forecast}
         favoriteActivities={favoriteActivities}
         traducirMainClima={traducirMainClima}
+        ciudad={ciudad}
       />
       <ActividadesAgendadas diasPronostico={diasPronostico}
         scheduledActivities={scheduledActivities}
