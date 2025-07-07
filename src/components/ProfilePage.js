@@ -40,7 +40,8 @@ function ProfilePage() {
     );
   }
 
-  const username = user.email.split('@')[0];
+  const username = user.nombre;
+  //const useremail = user.email;
   const createdAt = new Date(user.created_at);
   const fechaFormateada = createdAt.toLocaleDateString('es-CL', {
     year: 'numeric',
@@ -61,7 +62,7 @@ function ProfilePage() {
         <CardContent>
           <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
             <Avatar sx={{ width: 90, height: 90, bgcolor: 'black', fontSize: 36 }}>
-              {user.email.charAt(0).toUpperCase()}
+              {username.charAt(0).toUpperCase()}
             </Avatar>
             <Typography variant="h5" fontWeight={600}>
               {username}

@@ -14,14 +14,14 @@ const SALT_ROUNDS = 10;
 
 // → Ruta de registro
 app.post('/api/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { nombre, email, password } = req.body;
   try {
     // 1) Hashear contraseña
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     // 2) Insertar usuario
     const result = await pool.query(
-      'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email, created_at',
-      [email, hash]
+      'INSERT INTO users (nombre, email, password) VALUES ($1, $2, $3) RETURNING id, nombre, email, created_at',
+      [nombre, email, hash]
     );
     const user = result.rows[0];
     // 3) Devolver usuario sin password
@@ -87,7 +87,7 @@ function authenticateToken(req, res, next) {
 app.get('/api/profile', authenticateToken, async (req, res) => {
   const { id } = req.user;
   const result = await pool.query(
-    'SELECT id, email, created_at FROM users WHERE id = $1',
+    'SELECT id, nombre, email, created_at FROM users WHERE id = $1',
     [id]
   );
   res.json({ profile: result.rows[0] });

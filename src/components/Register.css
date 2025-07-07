@@ -70,7 +70,8 @@ body {
 }
 
 .form-group input[type="email"],
-.form-group input[type="password"] {
+.form-group input[type="password"],
+.form-group input[type="text"]{
   width: 100%;
   padding: 14px 15px;
   border: 1px solid #ddd;
@@ -82,7 +83,8 @@ body {
 }
 
 .form-group input[type="email"]:focus,
-.form-group input[type="password"]:focus {
+.form-group input[type="password"]:focus,
+.form-group input[type="text"]:focus {
   border-color: #007bff; /* Borde azul al enfocar */
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); /* Sombra suave al enfocar */
   outline: none; /* Elimina el contorno por defecto del navegador */

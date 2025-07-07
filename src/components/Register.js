@@ -6,6 +6,7 @@ import './Register.css';
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [nombre, setNombre] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -13,6 +14,7 @@ const Register = () => {
     const { name, value } = e.target;
     if (name === 'email') setEmail(value);
     else if (name === 'password') setPassword(value);
+    else if (name === 'nombre') setNombre(value);
   };
 
   const handleSubmit = async (e) => {
@@ -23,7 +25,7 @@ const Register = () => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/register`,
-        { email, password }
+        { nombre, email, password }
       );
       alert('Registro exitoso. Ya puedes iniciar sesión.');
       window.location.href = '/login';
@@ -42,6 +44,18 @@ const Register = () => {
         {error && <p className="error-message">{error}</p>}
         <form onSubmit={handleSubmit} className="register-form">
           <div className="form-group">
+            <div className="form-group">
+              <label htmlFor="nombre">Nombre</label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                value={nombre}
+                onChange={handleChange}
+                required
+                aria-label="Nombre"
+              />
+            </div>
             <label htmlFor="email">Correo electrónico</label>
             <input
               type="email"

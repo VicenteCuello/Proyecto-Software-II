@@ -63,7 +63,7 @@ function ViewProfile() {
         onClick={() => navigate('/perfil')}
       >
         <Avatar sx={{ bgcolor: 'black' }}>
-          {user.email.charAt(0).toUpperCase()}
+          {user.nombre.charAt(0).toUpperCase()}
         </Avatar>
       </Box>
     </Tooltip>
